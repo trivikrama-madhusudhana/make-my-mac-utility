@@ -1,6 +1,6 @@
 # September 14 publish validation
 
-**Verdict: ready for an initial public beta of the skill.** The new browser-choice handoff works in an active Codex session, the fresh native fixture passes the repaired paths exercised on this Mac, and the portable release includes the helper, its UI, instructions, tests, and license. This is not a guarantee of defect-free generated apps or all-Mac compatibility. Publication itself has not been performed.
+**Verdict: ready for an initial public beta of the skill.** The new browser-choice handoff works in an active Codex session, the fresh native fixture passes the repaired paths exercised on this Mac, and the portable release includes the helper, its UI, instructions, tests, and license. This is not a guarantee of defect-free generated apps or all-Mac compatibility. At the time of these checks, publication had not been performed. The author subsequently approved public release on September 14, 2026.
 
 ## What changed
 

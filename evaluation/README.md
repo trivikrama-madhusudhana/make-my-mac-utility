@@ -1,6 +1,6 @@
 # Evaluation summary
 
-**Assessment: ready for an initial beta within the tested workflow.** The repository remains private pending the author's review. Generated apps still need their own verification; these evaluations do not establish reliability across every idea, coding agent, or Mac.
+**Assessment: ready for an initial beta within the tested workflow.** The author approved public release on September 14, 2026. Generated apps still need their own verification; these evaluations do not establish reliability across every idea, coding agent, or Mac.
 
 ## What was checked
 
