@@ -83,4 +83,4 @@ Build source and skill archives with `python3 evaluation/package_release.py`. Ou
 
 MIT, copyright 2026 Trivikrama Madhusudhana. The [license](LICENSE) is also included in the standalone skill folder.
 
-I used Matt Pocock's [Writing Great Skills reference](https://github.com/mattpocock/skills) while writing the instructions. It isn't a runtime dependency or bundled content.
+I used Matt Pocock's [Writing for Agents](https://github.com/mattpocock/skills/blob/main/skills/productivity/writing-for-agents/SKILL.md) while writing the instructions. It isn't a runtime dependency or bundled content.
