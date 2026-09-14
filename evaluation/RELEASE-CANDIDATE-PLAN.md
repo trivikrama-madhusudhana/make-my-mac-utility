@@ -66,4 +66,4 @@ Each run has its own directory and a fixed copied skill snapshot. No production
 files, credentials, unrelated projects, startup settings, publication or installs
 are involved. CLIs may build fixture bundles; the evaluator handles GUI testing
 sequentially. Keep original HTML, every revision, selected approval and screenshots.
-Expose a four-model release-candidate gallery alongside the original sprint archive.
+Expose a four-model release-candidate gallery alongside the original sprint archive. Subsequent repository cleanup retains these galleries locally and excludes them from the distributed source.

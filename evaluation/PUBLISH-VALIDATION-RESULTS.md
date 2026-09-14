@@ -16,7 +16,7 @@ The implementation uses the general localhost event/wait pattern inspected in Im
 
 A fresh Codex subagent received a fictional everyday knitting problem without earlier findings or the evaluator's test plan. Consultation established one named project, completed-row count, +1, one-step undo, confirmed reset, local persistence, a covered-by-other-windows accessory panel, and no login startup. Three HTML designs were produced. The evaluator selected A Cozy card at 300 × 440 after browser inspection. A second preview revision added unreadable-data recovery; the evaluator inspected it and explicitly approved the disposable build.
 
-The [preserved gallery](../review/publish-validation/index.html) contains both actual generated preview revisions. They remain historical snapshots, including their original verification-status text.
+Both actual generated preview revisions are retained in the local evidence, including their original verification-status text. The generated gallery is excluded from the repository.
 
 All three original previews were observed incrementing, undoing, retaining count during simulated save failure, retrying once after recovery, and rendering long names with a 1,234-row count. They stacked and remained usable at a 620 × 800 browser viewport. A's confirmed reset and reset undo passed. All three revised previews blocked mutation while data was unreadable, remained blocked after failed Retry, and recovered the saved project after restoring readable data.
 
@@ -64,10 +64,10 @@ No external Mac, Intel Mac, older macOS runtime, external-display change, full S
 
 One intervening user interaction changed the fixture count; the baseline was refreshed before the scored repaired tests. A screen-capture interruption and a clipboard-acknowledgment timeout were treated as harness issues; the latter's text insertion was independently visible. Test filesystem permissions were restored, the fixture app was quit, and its runtime data was moved into local evidence. Both review servers and the preview server were stopped. No real user records were renamed or replaced, and no login startup or global settings were changed.
 
-Raw local evidence under `evaluation/runs/publish-2026-09-14` retains prompts, responses, source snapshots, original and repaired apps, hashes, fault fixtures, receipts, and observations. Those local records are not included in the public download. The plan, tests, report, skill, and portable preview gallery are included.
+Raw local evidence under `evaluation/runs/publish-2026-09-14` retains prompts, responses, source snapshots, original and repaired apps, hashes, fault fixtures, receipts, and observations. Those local records are not included in the public download. The plan, tests, report, and skill are included; the generated gallery is excluded.
 
 ## Repository preparation
 
-The two published knitting-counter HTML copies omit the decorative tagline during repository preparation. Their controls and behavior are unchanged. Original snapshots remain in the local evidence; published copies are not byte-identical to those originals. License attribution was updated after validation, and `final-skill.sha256` identifies the prepared distribution.
+The earlier repository preparation removed a decorative tagline from two gallery copies without changing controls or behavior. Those copies and the original snapshots are now retained locally; the gallery is excluded from the repository. License attribution was updated after validation, and `final-skill.sha256` identifies the prepared distribution.
 
 The release review found and fixed two additional issues: discovery probes now create their output parent on a fresh clone, and the choice bridge preserves a receipt when directory sync fails after atomic replacement. Two additional integration tests check the latter failure, conflict rejection, identical retry, offline replay, and acknowledgement persistence. The prepared suite now contains 14 bridge tests and four packager tests. A failed directory sync cannot guarantee survival across power loss.

@@ -15,3 +15,6 @@ MEMORY.md
 .env.*
 evaluation/rc-prompts/*
 !evaluation/rc-prompts/FACTS.md
+
+# Generated design galleries are retained locally only.
+/review/

@@ -16,7 +16,7 @@ Three designs are the starting point. Ask for more alternatives, request changes
 
 When you're ready, the agent recaps the agreed app and builds it with your approval. It checks the packaged app against that agreement, repairs issues it finds, and tells you what it could and couldn't verify. You receive a local app you can launch, editable source code, and instructions for building, using, and maintaining it.
 
-For an example, the [knitting-counter review](review/publish-validation/index.html) shows an initial set of designs and a revision that adds recovery for unreadable saved data. Download or clone the repository and open the HTML gallery locally to try the previews.
+The [Pocket Notes example](examples/pocket-notes/README.md) contains three interactive designs for a notes utility. Download or clone the repository and open its `options.html` locally to try them.
 
 ## Running it
 
@@ -40,6 +40,8 @@ The skill includes a local review helper that sends your browser choice to the a
 Each choice belongs to the preview and brief you reviewed. The helper rejects stale or conflicting submissions, and changing direction starts a new review round. Choosing a design records your preference; the agent still follows your agreement about when to build. See the [review helper reference](skills/make-my-mac-utility/references/design-review.md) for setup, storage, and recovery details.
 
 ## Development and evaluation
+
+Start with the [evaluation summary](evaluation/README.md) for the results, remaining limits, and links to detailed records.
 
 The skill includes Python helpers for collecting design choices and packaging a local Swift app. The packager applies local ad-hoc signing; public signing and notarization are separate distribution work.
 
@@ -67,7 +69,6 @@ All native evaluation used one Apple silicon Mac. Intel hardware, another Mac, o
 | --- | --- |
 | `skills/make-my-mac-utility/` | Installable skill, references, review page, and helper scripts |
 | `evaluation/` | Plans, scenario fixtures, tests, and reports |
-| `review/` | Preserved HTML design galleries; download or clone and open locally |
 | `examples/pocket-notes/` | A fictional notes-app consultation example |
 | `package-metadata.json` | Source distribution metadata, not a package-manager installer |
 | `design/brief.md` in a generated project | Behavior, data contract, selected design, agreement, and acceptance checks |

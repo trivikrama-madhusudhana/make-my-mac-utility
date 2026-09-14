@@ -57,9 +57,9 @@ This workspace's file provider reattaches Finder metadata to loose app bundles, 
 
 ## Review and reproduction
 
-The [four-model review gallery](../review/release-candidate/index.html) preserves 11 actual HTML versions and all three alternatives per version, including an intermediate Fable snapshot. Opus revision 2 was recovered from its complete recorded file read before revision 3; the manifest identifies that provenance. The [earlier sprint archive](../review/index.html) remains unchanged. These are generated designs, not evaluator replacements.
+The four-model gallery and earlier sprint archive are retained locally and excluded from the repository. They preserve 11 release-candidate HTML versions, including an intermediate Fable snapshot. Opus revision 2 was recovered from its complete recorded file read before revision 3; the local manifest identifies that provenance. These are generated designs, not evaluator replacements.
 
-Local raw evidence is retained under `evaluation/runs/rc1-*`: exact prompts and answers, approvals, model metadata, source, tests, original/repaired archives and independent probes. Raw provider streams and personal workspace paths are excluded from the public package. The portable galleries, test plans, harnesses and this report are included. Run `run_artifact.py` for fresh artifact tasks, inspect the previews, and give a specific fixture approval before continuing. Native checks require a Mac and actual GUI interaction.
+Local raw evidence is retained under `evaluation/runs/rc1-*`: exact prompts and answers, approvals, model metadata, source, tests, original/repaired archives and independent probes. Raw provider streams and personal workspace paths are excluded from the public package. The test plans, harnesses and this report are included; generated galleries are excluded. Run `run_artifact.py` for fresh artifact tasks, inspect the previews, and give a specific fixture approval before continuing. Native checks require a Mac and actual GUI interaction.
 
 The unchanged packaging helper passed its four regression tests again, including moved-app resource loading and path/resource protections. Skill metadata validation also passed.
 
