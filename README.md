@@ -1,6 +1,6 @@
 # Make My Mac Utility
 
-I built this skill to turn an app idea into a native Mac utility through a consultation, three interactive design options, and an agreed build brief. It runs in Claude Code or Codex and includes Python helpers for collecting design choices and packaging a local Swift app.
+This skill helps you turn an app idea or a repeated workflow into a native Mac utility through a consultative process. It works with both Claude Code and Codex, and potentially other coding agents (has been tested only on claude code and codex). It includes Python helpers for collecting design choices and packaging a local Swift app.
 
 ## A choice needs context
 
