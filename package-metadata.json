@@ -1,0 +1,27 @@
+{
+  "name": "make-my-mac-utility",
+  "description": "A skill for designing and building native Mac utilities with Claude Code or Codex.",
+  "author": "Trivikrama Madhusudhana",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/trivikrama-madhusudhana/make-my-mac-utility.git"
+  },
+  "homepage": "https://github.com/trivikrama-madhusudhana/make-my-mac-utility",
+  "bugs": {
+    "url": "https://github.com/trivikrama-madhusudhana/make-my-mac-utility/issues"
+  },
+  "keywords": [
+    "macos",
+    "swiftui",
+    "appkit",
+    "agent-skills",
+    "codex",
+    "claude-code"
+  ],
+  "engines": {
+    "python": ">=3.10"
+  },
+  "distribution": "Copy the skills/make-my-mac-utility folder into your client skill directory. This metadata is not a package-manager installer.",
+  "nativeBuildRequirements": "macOS with a compatible Swift toolchain, SDK, and codesign."
+}

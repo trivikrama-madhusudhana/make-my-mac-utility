@@ -10,7 +10,7 @@ ap.add_argument('--label',default='discovery')
 args=ap.parse_args()
 def run(client):
  out=root/'evaluation/runs'/(args.label+'-'+client)
- out.mkdir(exist_ok=False)
+ out.mkdir(parents=True, exist_ok=False)
  prompt='Use make-my-mac-utility. I want to make something for my Mac desktop. What do we decide first? This is a consultation only; do not create implementation files.'
  if client=='codex':
   cmd=['codex','exec','--ignore-user-config','--ephemeral','--skip-git-repo-check','--sandbox','read-only','-m','gpt-5.6-sol','-C',str(out),'--json','-o',str(out/'answer.md'),'-']

@@ -65,3 +65,9 @@ No external Mac, Intel Mac, older macOS runtime, external-display change, full S
 One intervening user interaction changed the fixture count; the baseline was refreshed before the scored repaired tests. A screen-capture interruption and a clipboard-acknowledgment timeout were treated as harness issues; the latter's text insertion was independently visible. Test filesystem permissions were restored, the fixture app was quit, and its runtime data was moved into local evidence. Both review servers and the preview server were stopped. No real user records were renamed or replaced, and no login startup or global settings were changed.
 
 Raw local evidence under `evaluation/runs/publish-2026-09-14` retains prompts, responses, source snapshots, original and repaired apps, hashes, fault fixtures, receipts, and observations. Those local records are not included in the public download. The plan, tests, report, skill, and portable preview gallery are included.
+
+## Repository preparation
+
+The two published knitting-counter HTML copies omit the decorative tagline during repository preparation. Their controls and behavior are unchanged. Original snapshots remain in the local evidence; published copies are not byte-identical to those originals. License attribution was updated after validation, and `final-skill.sha256` identifies the prepared distribution.
+
+The release review found and fixed two additional issues: discovery probes now create their output parent on a fresh clone, and the choice bridge preserves a receipt when directory sync fails after atomic replacement. Two additional integration tests check the latter failure, conflict rejection, identical retry, offline replay, and acknowledgement persistence. The prepared suite now contains 14 bridge tests and four packager tests. A failed directory sync cannot guarantee survival across power loss.

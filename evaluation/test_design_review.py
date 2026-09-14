@@ -219,6 +219,64 @@ class DesignReview(unittest.TestCase):
         self.assertIsNone(bridge.read_state(self.path)['selection'])
         self.assertEqual(self.request(choice='A')['selection']['choice'], 'A')
 
+    def test_directory_sync_failure_preserves_replaced_choice_until_retry(self):
+        original_fsync = bridge.os.fsync
+        calls = 0
+
+        def fail_directory_once(fd):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError('directory sync failed')
+            return original_fsync(fd)
+
+        with mock.patch.object(bridge.os, 'fsync', side_effect=fail_directory_once):
+            with self.assertRaises(HTTPError) as error:
+                self.request(choice='A')
+            self.assertEqual(error.exception.code, 500)
+        live = self.request('status')
+        on_disk = bridge.read_state(self.path)
+        self.assertEqual(live['selection'], on_disk['selection'])
+        self.assertEqual(live['selection']['choice'], 'A')
+        self.assertIsNotNone(live['storage_warning'])
+        with self.assertRaises(HTTPError) as error:
+            self.request(choice='B')
+        self.assertEqual(error.exception.code, 409)
+        confirmed = self.request(choice='A')
+        self.assertIsNone(confirmed['storage_warning'])
+        self.assertEqual(confirmed['selection'], live['selection'])
+        self.request('stop')
+        self.thread.join(3)
+        self.assertEqual(bridge.client('wait', self.path, 0)['selection'], live['selection'])
+
+    def test_ack_failure_preserves_prior_delivery_and_replaced_state(self):
+        self.request(choice='C')
+        original_fsync = bridge.os.fsync
+        calls = 0
+
+        def fail_directory_once(fd):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise OSError('directory sync failed')
+            return original_fsync(fd)
+
+        with mock.patch.object(bridge.os, 'fsync', side_effect=fail_directory_once):
+            with self.assertRaises(HTTPError) as error:
+                self.request('ack')
+            self.assertEqual(error.exception.code, 500)
+        live = self.request('status')
+        self.assertIsNotNone(live['storage_warning'])
+        self.assertEqual(live['delivered_at'], bridge.read_state(self.path)['delivered_at'])
+        confirmed = self.request('ack')
+        self.assertIsNone(confirmed['storage_warning'])
+        with mock.patch.object(self.review, 'persist', side_effect=OSError('disk full')):
+            with self.assertRaises(HTTPError) as error:
+                self.request('ack')
+            self.assertEqual(error.exception.code, 500)
+        self.assertEqual(self.request('status')['delivered_at'], confirmed['delivered_at'])
+        self.assertEqual(bridge.read_state(self.path)['delivered_at'], confirmed['delivered_at'])
+
 
 if __name__ == '__main__':
     unittest.main()

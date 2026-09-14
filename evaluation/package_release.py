@@ -32,7 +32,7 @@ def archive(name, files, prefix):
 def main():
     DIST.mkdir(exist_ok=True)
     skill = list(files_below(ROOT / 'skills'))
-    public = [ROOT / name for name in ['README.md', 'LICENSE', '.gitignore']]
+    public = [ROOT / name for name in ['README.md', 'LICENSE', '.gitignore', 'package-metadata.json']]
     public += skill + list(files_below(ROOT / 'review')) + list(files_below(ROOT / 'examples'))
     public += [p for p in (ROOT / 'evaluation').iterdir()
                if p.is_file() and p.suffix in {'.md', '.txt', '.py', '.cjs', '.sha256'}]

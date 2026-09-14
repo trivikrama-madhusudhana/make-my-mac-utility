@@ -60,3 +60,9 @@ python3 -m unittest discover -s evaluation -p test_design_review.py -v
 ```
 
 The tests use temporary fixtures and local ephemeral ports. They cover an active CLI waiter receiving a choice, replay after server stop, duplicate/conflicting submissions, None with and without feedback, source invalidation, token/Host/Origin checks, route and payload bounds, sandbox policy, private state, existing-file preservation, timeout without selection, authenticated cleanup, and a failed disk write without a false receipt. Separately inspect the real review in a browser: choose an option while an actual waiter is active, verify the receipt and waiter output, and exercise a disposable None round. Browser appearance and interaction are not established by the HTTP tests alone.
+
+## Storage-sync failures
+
+If writing fails before replacement, the previous receipt stays intact and the browser can retry. If directory sync fails after replacement, the new receipt already exists: the helper retains that choice, returns an error, and exposes `storage_warning` in live state. Only an identical choice may be retried; a successful write clears the warning. Do not describe a live warning as confirmed durable delivery. Acknowledgement failures also preserve the last state actually written rather than silently erasing a previous delivery timestamp.
+
+Offline replay reports the receipt that is present on disk. It cannot reconstruct an interrupted server response or establish survival across power loss after a failed directory sync. `delivered_at` records the acknowledgement timestamp written by the helper, not proof that the agent completed downstream work. Design selection remains separate from build authorization.

@@ -1,55 +1,74 @@
 # Make My Mac Utility
 
-A skill that brings Mac accessory-app expertise, design judgment and a friendly consultation to your app idea. No technical knowledge required to describe what you want.
+I built this skill to turn an app idea into a native Mac utility through a consultation, three interactive design options, and an agreed build brief. It runs in Claude Code or Codex and includes Python helpers for collecting design choices and packaging a local Swift app.
 
-Describe the job. The agent assesses whether it fits a desktop utility, settles the behavior with you, and shows **three interactive HTML design options**. After you select and approve the design and functionality, it builds the native app.
+## A choice needs context
 
-Choose **A, B, C, or None of these** in the browser, with optional feedback. The bundled local review server sends that choice to the waiting agent session automatically. No external webhook or account is needed. The agent must keep its wait active; a saved choice can be retrieved later, but the helper cannot wake an ended session. Where localhost tools are unavailable, you can reply with your choice in chat. Choosing a design records your direction; the exact build agreement still determines when implementation begins.
+Clicking A means little if the design has changed since you saw it. The review helper freezes the preview and brief, hashes both, and attaches the choice to that version. It rejects stale or conflicting submissions and saves a receipt before confirming success in the browser. If directory sync fails after replacement, it retains the written choice and asks for an identical retry. A surviving receipt can be replayed, but a failed sync cannot establish durability across power loss.
 
-The app's job is yours to define. The skill recommends a suitable form: a quiet desktop companion, menu-bar popover, shortcut-invoked panel, or compact regular app you can switch to like Stickies. These are possibilities, not a catalog of templates. If the essential experience needs another kind of application, it explains why and helps you choose a route.
+You can choose A, B, C, or None of these, with optional feedback. A local server delivers the receipt to the agent's active wait command. No external webhook or account is involved. The generated preview runs in a sandboxed frame, separate from the selection token. If the agent session has ended, the choice stays on disk for retrieval; the helper cannot wake the session.
 
-These are standalone SwiftUI/AppKit apps, not Apple WidgetKit widgets. Rich text entry, search and custom window behavior can motivate that choice; it is not a claim of lower memory or battery use. The agent handles engineering choices and explains decisions in terms of how the app will feel and work.
+Selecting a design also isn't permission to build. The skill records that direction, resolves the remaining behavior, and checks the user's build agreement before implementation starts.
 
-## Use in Claude Code or Codex
+## The native app has to survive actual use
 
-The identical skill folder is used across clients. It has no required plugin, other skill, model-specific API, or browser connector. A browser is used for design review; a Mac with a compatible Swift toolchain is needed to build and test the native result.
+HTML can establish layout and interaction, but it can't establish native focus, window behavior, or persistence. The skill requires separate checks on the packaged app, including mouse click followed by typing, keyboard commands, quit and relaunch, and failures that could lose pending work.
 
-Copy `skills/make-my-mac-utility` into your agent's skill directory:
+During evaluation, a knitting counter passed its initial logic checks but failed native shortcuts and could discard a pending increment after a save failure. Those failures led to repairs and more specific skill instructions. The [validation report](evaluation/PUBLISH-VALIDATION-RESULTS.md) distinguishes original output, observed repairs, and retests. A passing generated test suite alone doesn't make an app ready.
 
-- Claude Code: `~/.claude/skills/` for personal use, or `.claude/skills/` in a project.
-- Codex: `~/.agents/skills/` for personal use, or `.agents/skills/` in a project.
+Packaging has its own boundary. The helper copies the executable and resources into an app bundle and applies local ad-hoc signing. It doesn't provide public signing or notarization.
 
-Then ask for `make-my-mac-utility`, or explicitly ask the agent to read its `SKILL.md` if your client has not refreshed skill discovery. Claude Code also supports `/make-my-mac-utility`; Codex supports `$make-my-mac-utility`.
+## Running it
 
-Example:
+Copy `skills/make-my-mac-utility` from this repository into your client's skill directory, checking for an existing copy first. Then ask for `make-my-mac-utility`, or ask the agent to read its `SKILL.md` if discovery hasn't refreshed. Describe the job you want the app to do; the consultation works out its form and behavior with you.
 
-> Use make-my-mac-utility. I want a little panel where I can log what I worked on without opening a spreadsheet. Help me decide the smallest useful version.
+| Requirement | Detail |
+| --- | --- |
+| Codex skill directory | `~/.agents/skills/` |
+| Claude Code skill directory | `~/.claude/skills/` |
+| Design review | A browser; Python 3.10 or newer for the optional local choice helper |
+| Native build | A Mac with a compatible Swift toolchain and macOS SDK |
+| Helper dependencies | Python standard library; no third-party Python packages |
+| Client capabilities | File access and command execution; GUI testing needs available browser and native interaction tools |
 
-The skill asks for missing decisions rather than forcing a long questionnaire. You can delegate minor choices. If you want an Apple widget from the widget gallery, it will explain the difference and recommend that route instead.
+The same skill folder is used by both clients. Chat selection remains available when localhost tools or persistent execution aren't available. Generated apps use SwiftUI/AppKit; these are standalone apps, not WidgetKit widgets.
 
-Design judgment is part of the consultation: proportions that fit your content,
-clear hierarchy, considered typography and spacing, and a visual personality suited
-to the job. Each of the three options offers a real layout choice. You can ask for
-quiet, vivid, playful or dense; the agent recommends a direction and explains why.
+## Development and evaluation
 
-The release targets Astra and Sol in Codex, and Opus and Fable in Claude Code.
-See the [four-model review gallery](review/release-candidate/index.html) to compare the actual consultations and revisions. The [earlier sprint archive](review/index.html) and [Pocket Notes example](examples/pocket-notes/options.html) are preserved too. Grok is outside the supported release scope.
+Run the complete helper suite on a Mac with Swift and `codesign`:
 
-## What you get
+```sh
+python3 -m unittest discover -s evaluation -p 'test_*.py' -v
+```
 
-- `design/brief.md`: scope, behavior, data contract, selected design, approval and acceptance checks.
-- `design/options.html`: three designs and the revised selected option, viewable offline.
-- Editable native source and a launchable local `.app` after the build agreement.
-- Build/run instructions and an honest record of what was tested.
+For the review bridge alone, without building a native app:
 
-HTML is a design prototype. Native window behavior and integrations are checked separately. Public signing/notarization is a later distribution step; the included packager performs local ad-hoc signing.
+```sh
+python3 -m unittest discover -s evaluation -p 'test_design_review.py' -v
+```
 
-## Evaluation and provenance
+The current suite has 14 bridge tests and four packager tests. [Earlier evaluations](evaluation/RELEASE-CANDIDATE-RESULTS.md) cover Astra and Sol in Codex, and Opus and Fable in Claude Code. The September 14 follow-up adds a knitting-counter build and browser-to-agent delivery in Codex. It does not establish a fresh four-model pass after every final edit, or verify Claude Code's background notification route.
 
-The [September 14 publish validation](evaluation/PUBLISH-VALIDATION-RESULTS.md) covers a fresh knitting-counter build, observed native repairs, paired response probes, and browser-to-agent choice delivery. Its [preserved preview gallery](review/publish-validation/index.html) shows both design revisions. The skill folder and standalone download include the MIT license.
+All native evaluation used one Apple silicon Mac. Intel hardware, another Mac, older macOS runtimes, VoiceOver, and the full Spaces and sleep/wake behavior remain unverified. Grok output is retained as historical evidence and is outside the supported release scope.
 
-See [the release evaluation](evaluation/RELEASE-CANDIDATE-RESULTS.md) for model runs, observed results, repairs and limitations. Model compatibility means a shared workflow, not identical design output. Codex Desktop uses the same skill instructions; its preview, question and automation tools may differ from the CLI.
+## Repository and generated files
 
-Written using Matt Pocock's *Writing Great Skills* principles: checkable completion criteria, progressive disclosure, and pruning repeated instructions. The locally installed `matt-pocock-writing-skills` reference was consulted; it is not bundled or required to run this skill. Upstream: [mattpocock/skills](https://github.com/mattpocock/skills).
+| Path | Contents |
+| --- | --- |
+| `skills/make-my-mac-utility/` | Installable skill, references, review page, and helper scripts |
+| `evaluation/` | Plans, scenario fixtures, tests, and reports |
+| `review/` | Preserved HTML design galleries; download or clone and open locally |
+| `examples/pocket-notes/` | A fictional notes-app consultation example |
+| `package-metadata.json` | Source distribution metadata, not a package-manager installer |
+| `design/brief.md` in a generated project | Behavior, data contract, selected design, agreement, and acceptance checks |
+| `design/options.html` in a generated project | Interactive design options |
 
-The window patterns come from personal native desktop tools. Examples and evaluation fixtures use fictional local data; the package does not contain their client integrations or credentials.
+Runtime app storage is agreed during consultation rather than imposed by the skill. Review state contains a local selection token and is private working data. Raw agent runs, local build artifacts, and screenshots are excluded from this repository. The [evaluation index](evaluation/README.md) explains which evidence is included and which was retained locally.
+
+Build source and skill archives with `python3 evaluation/package_release.py`. Outputs go to the ignored `dist/` directory.
+
+## License and attribution
+
+MIT, copyright 2026 Trivikrama Madhusudhana. The [license](LICENSE) is also included in the standalone skill folder.
+
+I used Matt Pocock's [Writing Great Skills reference](https://github.com/mattpocock/skills) while writing the instructions. It isn't a runtime dependency or bundled content.

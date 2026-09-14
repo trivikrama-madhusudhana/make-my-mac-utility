@@ -40,6 +40,10 @@ def digest(path):
     return data, hashlib.sha256(data).hexdigest()
 
 
+class AtomicReplaceUncertain(OSError):
+    """The new file is visible, but syncing its directory failed."""
+
+
 def atomic_write(path, value):
     fd, temp = tempfile.mkstemp(prefix='.' + path.name + '-', dir=path.parent)
     try:
@@ -48,11 +52,14 @@ def atomic_write(path, value):
             output.flush()
             os.fsync(output.fileno())
         os.replace(temp, path)
-        directory = os.open(path.parent, os.O_RDONLY)
         try:
-            os.fsync(directory)
-        finally:
-            os.close(directory)
+            directory = os.open(path.parent, os.O_RDONLY)
+            try:
+                os.fsync(directory)
+            finally:
+                os.close(directory)
+        except OSError as error:
+            raise AtomicReplaceUncertain('Receipt replaced; directory sync failed.') from error
     finally:
         if os.path.exists(temp):
             os.unlink(temp)
@@ -91,6 +98,7 @@ class Review:
         self.template = ASSET.read_text()
         self.condition = threading.Condition()
         self.waiters = 0
+        self.storage_warning = None
         self.state = dict(version=1, review_id=secrets.token_hex(16), revision=revision,
                           html=str(self.html), brief=str(self.brief), html_sha256=html_hash,
                           brief_sha256=brief_hash, token=secrets.token_urlsafe(32),
@@ -112,7 +120,12 @@ class Review:
             raise
 
     def persist(self):
-        atomic_write(self.path, self.state)
+        try:
+            atomic_write(self.path, self.state)
+        except AtomicReplaceUncertain:
+            self.storage_warning = "Choice written, but storage sync failed. Retry the same choice."
+            raise
+        self.storage_warning = None
 
     def stale(self):
         try:
@@ -128,7 +141,7 @@ class Review:
 
     def public(self):
         return {key: value for key, value in self.state.items() if key not in ('token', 'url')} | {
-            'waiting_clients': self.waiters}
+            'waiting_clients': self.waiters, 'storage_warning': self.storage_warning}
 
     def handler(self):
         review = self
@@ -220,8 +233,15 @@ class Review:
                     if self.path == '/api/ack':
                         if review.state['selection'] is None:
                             return self.reply(409, {'error': 'No selection to acknowledge.'})
-                        review.state['delivered_at'] = review.state['delivered_at'] or now()
-                        review.persist()
+                        previous_delivered_at = review.state['delivered_at']
+                        review.state['delivered_at'] = previous_delivered_at or now()
+                        try:
+                            review.persist()
+                        except AtomicReplaceUncertain:
+                            return self.reply(500, {'error': 'Delivery acknowledgement written, but storage sync failed. Retry.'})
+                        except OSError:
+                            review.state['delivered_at'] = previous_delivered_at
+                            return self.reply(500, {'error': 'Could not confirm delivery. Check local storage and retry.'})
                         return self.reply(200, review.public())
                     stale = review.stale()
                     if self.path == '/api/select':
@@ -244,12 +264,16 @@ class Review:
                                 html=review.state['html'], brief=review.state['brief'],
                                 html_sha256=review.state['html_sha256'], brief_sha256=review.state['brief_sha256'],
                                 evidence='explicit_browser_choice', build_authorized=False)
-                            try:
-                                review.persist()  # Receipt follows durable replacement.
-                            except OSError:
-                                review.state['selection'] = None
-                                return self.reply(500, {'error': 'Could not save receipt. Retry after checking local storage.'})
+                        try:
+                            # Retry an identical choice too, to confirm an uncertain write.
+                            review.persist()
+                        except AtomicReplaceUncertain:
                             review.condition.notify_all()
+                            return self.reply(500, {'error': review.storage_warning})
+                        except OSError:
+                            review.state['selection'] = previous
+                            return self.reply(500, {'error': 'Could not save receipt. Retry after checking local storage.'})
+                        review.condition.notify_all()
                     if self.path == '/api/wait':
                         seconds = payload.get('timeout', 30)
                         if isinstance(seconds, bool) or not isinstance(seconds, (float, int)) or not 0 <= seconds <= 30:
@@ -300,7 +324,8 @@ def result_summary(state, connection):
     return dict(status=status, connection=connection, review_id=state['review_id'],
                 revision=state['revision'], selection=state.get('selection'),
                 stale=state.get('stale', False), lifecycle=state.get('lifecycle'),
-                delivered_at=state.get('delivered_at'), waiting_clients=state.get('waiting_clients', 0))
+                delivered_at=state.get('delivered_at'), waiting_clients=state.get('waiting_clients', 0),
+                storage_warning=state.get('storage_warning'))
 
 
 def client(command, path, timeout=30):

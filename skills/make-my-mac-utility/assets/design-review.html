@@ -51,7 +51,12 @@ function show(state) {
   reviewId = state.review_id;
   ended = state.stale || state.lifecycle !== 'running';
   document.querySelector('#metadata').textContent = 'Revision: ' + state.revision;
-  if (state.selection) {
+  if (state.selection && state.storage_warning) {
+    saved = null;
+    receipt.textContent = state.storage_warning;
+    feedback.value = state.selection.feedback;
+    feedback.disabled = true;
+  } else if (state.selection) {
     saved = state.selection;
     receipt.textContent = 'Choice saved: ' + (saved.choice === 'None' ? 'None of these' : saved.choice);
     feedback.value = saved.feedback;
@@ -62,6 +67,8 @@ function show(state) {
   }
   if (state.lifecycle !== 'running') {
     connection.textContent = 'This review has ended. Return to the conversation to continue.';
+  } else if (state.storage_warning) {
+    connection.textContent = 'Storage sync is unconfirmed. Retry the recorded choice or return to the conversation.';
   } else if (state.delivered_at) {
     connection.textContent = 'Your agent received this choice. Return to the conversation to continue.';
   } else if (state.waiting_clients > 0) {
@@ -70,6 +77,11 @@ function show(state) {
     connection.textContent = saved ? 'Your agent is not waiting. Choice saved; return to the conversation to continue.' : 'Your agent is not waiting. You can save a choice, then return to the conversation to continue.';
   }
   setEnabled(!saved && !busy && !ended);
+  if (state.storage_warning && state.selection) {
+    buttons.forEach(button => {
+      button.disabled = busy || ended || button.dataset.choice !== state.selection.choice;
+    });
+  }
 }
 async function refresh() {
   if (!token) {
