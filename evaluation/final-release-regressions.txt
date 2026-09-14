@@ -1,0 +1,11 @@
+Five independent text-only conversations follow. Write only the actual next assistant response for each case, with its ID. No tool actions are possible in this probe; do not pretend to create files or inspect a UI.
+
+AB. First message: "I repair fountain pens. I'd love a little Mac thing that helps me with the annoying part of that, but I don't know what to ask for. I don't code."
+
+AC. Context: User has settled a compact local specimen-reference app, delegates engineering, and asks for a vivid, readable field-guide feel. They say: "You choose the technical stuff. What will it look like?"
+
+AD. Context: Planning a countdown utility. Draft brief says "If saving Cancel fails, return to an empty form anyway without a message; the old timer may return after relaunch." User says: "I want this to be dependable and understandable. Is that behavior okay?"
+
+AE. Context: A batch file operation fails on item two. Returning item one to its original location fails too. The proposed error text says "All original files restored." User asks: "Can we ship this recovery behavior?"
+
+AF. Context: A's HTML and 660x480 design are approved and the app is built. The native Inventory Code label wraps into five tiny fragments while the HTML label is legible. The user says: "Please finish the native checks."

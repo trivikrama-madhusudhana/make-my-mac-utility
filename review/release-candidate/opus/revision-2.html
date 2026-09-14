@@ -1,0 +1,706 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Steep — three designs</title>
+<style>
+  :root {
+    --ink: #3A2417;
+    --muted: #7A5B45;
+    --cream: #FFF9F0;
+    --line: #D9C2A3;
+    --brew: #9C4F1C;
+    --brew-hover: #86420F;
+    --ready-bg: linear-gradient(#FCE6B4, #F3CF84);
+    --ready-ink: #7A3A10;
+    --focus: #1F5FD1;
+    --sans: system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --round: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, sans-serif;
+    --serif: ui-serif, "New York", Georgia, "Times New Roman", serif;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; font-family: var(--sans); color: #222; background: #ECE8E2; line-height: 1.4; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .page-head { max-width: 1240px; margin: 0 auto; padding: 24px 20px 8px; }
+  .page-head h1 { margin: 0 0 6px; font: 700 26px var(--round); color: var(--ink); }
+  .page-head p { margin: 0 0 10px; max-width: 880px; }
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin: 12px 0 8px; }
+  .demo-controls button, .demo-controls label { font: 500 14px var(--sans); }
+  .demo-controls button { padding: 7px 12px; border-radius: 8px; border: 1px solid #B9AFA3; background: #fff; cursor: pointer; }
+  .demo-controls button span { color: #666; font-weight: 400; }
+  .sim-note { font-size: 13px; color: #5B5249; }
+  .recommend { background: #fff; border-left: 4px solid var(--brew); padding: 10px 14px; border-radius: 6px; max-width: 880px; }
+
+  .options { max-width: 1240px; margin: 0 auto; padding: 8px 20px 24px; display: flex; flex-wrap: wrap; gap: 20px; }
+  .option { flex: 1 1 372px; max-width: 420px; min-width: 0; background: #fff; border-radius: 14px; padding: 14px; box-shadow: 0 1px 3px rgba(0,0,0,.08); display: flex; flex-direction: column; gap: 10px; }
+  .opt-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .opt-head h2 { margin: 0; font: 700 19px var(--round); color: var(--ink); }
+  .size { font-size: 12px; color: #6B625A; }
+  .why { margin: 0; font-size: 14px; }
+  .choose { align-self: flex-start; font: 600 14px var(--sans); padding: 8px 14px; border-radius: 8px; border: 1.5px solid var(--brew); color: var(--brew); background: #fff; cursor: pointer; }
+  .choose:hover { background: #FBF1E6; }
+
+  /* Desktop-like stage */
+  .option { overflow-x: auto; }
+  .stage { position: relative; min-width: 356px; height: 420px; border-radius: 12px; overflow: hidden; background: linear-gradient(160deg, #7F94A8, #B9AFA4 70%, #C8B8A6); }
+  .menubar { position: absolute; top: 0; left: 0; right: 0; height: 24px; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 0 10px; background: rgba(246,243,238,.85); font: 500 12px var(--sans); color: #1d1d1f; }
+  .menubar .app-menus { color: #444; white-space: nowrap; overflow: hidden; }
+  .menubar .spacer { flex: 1; }
+  .mb-wrap { position: relative; }
+  .mb-item { display: flex; align-items: center; gap: 4px; height: 20px; padding: 0 6px; border: 0; border-radius: 5px; background: transparent; color: #1d1d1f; font: 600 12px var(--round); font-variant-numeric: tabular-nums; cursor: pointer; }
+  .mb-item:hover, .mb-item[aria-expanded="true"] { background: rgba(0,0,0,.12); }
+  .mb-item svg { width: 16px; height: 14px; }
+  .mb-menu { position: absolute; top: 23px; right: 0; z-index: 7; min-width: 150px; padding: 5px; border-radius: 8px; background: rgba(250,248,245,.98); box-shadow: 0 8px 24px rgba(0,0,0,.25), 0 0 0 1px rgba(0,0,0,.08); display: flex; flex-direction: column; }
+  .mb-menu button { text-align: left; border: 0; background: none; padding: 4px 10px; border-radius: 5px; font: 13px var(--sans); color: #1d1d1f; cursor: pointer; }
+  .mb-menu button:hover, .mb-menu button:focus-visible { background: #2F6FEB; color: #fff; outline: none; }
+  .mb-menu hr { border: 0; border-top: 1px solid rgba(0,0,0,.12); margin: 4px 6px; }
+  .clock { color: #333; }
+
+  .work { position: absolute; left: 14px; right: 40px; top: 40px; bottom: 26px; z-index: 1; border-radius: 10px; background: rgba(255,255,255,.9); box-shadow: 0 6px 20px rgba(0,0,0,.18); padding: 30px 18px 0; overflow: hidden; }
+  .work::before { content: "Quarterly notes.txt"; position: absolute; top: 0; left: 0; right: 0; height: 22px; background: #EEEBE7; font: 11px var(--sans); color: #777; text-align: center; line-height: 22px; }
+  .work i { display: block; height: 7px; margin: 0 0 11px; border-radius: 4px; background: #E3DFDA; }
+  .stage-note { position: absolute; left: 50%; bottom: 36px; transform: translateX(-50%); z-index: 4; width: max-content; max-width: 88%; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.95); box-shadow: 0 4px 14px rgba(0,0,0,.2); font-size: 13px; text-align: center; }
+  .stage-note button { margin-top: 6px; font: 600 13px var(--sans); padding: 5px 10px; border-radius: 7px; border: 1px solid #B9AFA3; background: #fff; cursor: pointer; }
+
+  /* Shared panel pieces */
+  .panel { position: absolute; z-index: 4; color: var(--ink); font-family: var(--sans); user-select: none; -webkit-user-select: none; cursor: grab; touch-action: none; }
+  .panel.dragging { cursor: grabbing; }
+  .panel:focus { outline: none; }
+  .panel:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+  .ph { display: none; }
+  .panel[data-phase="idle"] .ph-idle,
+  .panel[data-phase="running"] .ph-running,
+  .panel[data-phase="ready"] .ph-ready { display: flex; }
+  .t-in { font-family: var(--round); font-weight: 650; font-variant-numeric: tabular-nums; text-align: center; color: var(--ink); background: #fff; border: 1.5px solid var(--line); border-radius: 10px; padding: 0; user-select: text; -webkit-user-select: text; cursor: text; }
+  .t-in::placeholder { color: #B9A58E; }
+  .t-in[aria-invalid="true"] { border-color: #B3261E; background: #FFF3F1; }
+  .field-label { font-size: 11px; color: var(--muted); }
+  .err { margin: 0; min-height: 16px; font-size: 12px; color: #A1281C; text-align: center; }
+  .btn { font: 600 14px var(--sans); border-radius: 10px; border: 0; padding: 9px 14px; cursor: pointer; }
+  .btn.primary { background: var(--brew); color: #fff; }
+  .btn.primary:hover { background: var(--brew-hover); }
+  .btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+  .btn.ghost:hover { background: rgba(58,36,23,.06); }
+  .hide-btn { width: 22px; height: 22px; flex: none; border-radius: 50%; border: 0; background: rgba(58,36,23,.09); color: var(--muted); font: 700 15px/22px var(--sans); cursor: pointer; padding: 0; }
+  .hide-btn:hover { background: rgba(58,36,23,.18); }
+  .save-fail { width: 100%; margin: 0; padding: 6px 9px; border-radius: 9px; background: #FFF1E8; border: 1px solid #E2B393; color: #7A2E12; font-size: 12px; line-height: 1.35; text-align: left; user-select: text; -webkit-user-select: text; cursor: auto; }
+  .save-fail strong { display: block; font-size: 12.5px; }
+  .panel[data-save="failed"] .err:empty { display: none; }
+  .sub { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .num { font-variant-numeric: tabular-nums; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tea { fill: #F7EEDD; transition: fill .6s; }
+
+  /* A · Mug */
+  .panel-a { width: 240px; height: 288px; padding: 12px 16px 16px; border-radius: 20px; background: linear-gradient(#FFF9F0, #F8EDDC); box-shadow: 0 14px 32px rgba(40,25,10,.3), 0 0 0 1px rgba(90,60,30,.14); display: flex; flex-direction: column; align-items: center; }
+  .panel-a[data-phase="ready"] { background: var(--ready-bg); }
+  .a-top { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+  .brand { font: 700 13px var(--round); color: var(--muted); letter-spacing: .02em; }
+  .mug { width: 112px; height: 90px; margin: 2px 0 8px; flex: none; }
+  .mug-line { fill: none; stroke: var(--ink); stroke-width: 3.5; stroke-linejoin: round; stroke-linecap: round; }
+  .steam path { fill: none; stroke: #B98E62; stroke-width: 3; stroke-linecap: round; opacity: 0; }
+  .panel-a[data-phase="running"] .steam path,
+  .panel-a[data-phase="ready"] .steam path { opacity: .75; animation: steam 2.6s ease-in-out infinite; }
+  .steam path:nth-child(2) { animation-delay: .5s; }
+  .steam path:nth-child(3) { animation-delay: 1s; }
+  @keyframes steam { 0%, 100% { transform: translateY(2px); opacity: .25; } 50% { transform: translateY(-3px); opacity: .85; } }
+  .panel-a .ph { flex: 1; width: 100%; flex-direction: column; align-items: center; justify-content: space-between; }
+  .a-inputs { display: flex; align-items: flex-start; gap: 6px; }
+  .a-inputs label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .a-inputs .t-in { width: 64px; height: 48px; font-size: 28px; }
+  .colon { font: 600 26px/48px var(--round); color: var(--muted); }
+  .panel-a .btn { width: 100%; }
+  .panel-a .ph-running .btn { width: auto; padding: 7px 18px; }
+  .a-time { font: 700 50px/1 var(--round); font-variant-numeric: tabular-nums; margin-top: 4px; }
+  .a-ready { font: 800 48px/1 var(--round); color: var(--ready-ink); letter-spacing: -.01em; }
+  .panel-a[data-save="failed"] .mug { height: 44px; margin: 0 0 4px; }
+
+  /* B · Strip */
+  .panel-b { width: 340px; border-radius: 22px; overflow: hidden; background: var(--cream); box-shadow: 0 14px 32px rgba(40,25,10,.3), 0 0 0 1px rgba(90,60,30,.14); }
+  .panel-b[data-phase="ready"] { background: var(--ready-bg); }
+  .b-row { display: flex; align-items: center; gap: 8px; height: 68px; padding: 0 12px 0 14px; }
+  .b-cup { width: 30px; height: 28px; flex: none; }
+  .panel-b .ph-idle, .panel-b .ph-running { flex: 1; align-items: center; gap: 6px; min-width: 0; }
+  .b-field { display: flex; align-items: center; gap: 4px; }
+  .b-field .t-in { width: 44px; height: 38px; font-size: 20px; }
+  .panel-b .ph-idle .btn, .panel-b .ph-running .btn { margin-left: auto; padding: 8px 13px; }
+  .b-time { font: 700 32px/1 var(--round); font-variant-numeric: tabular-nums; }
+  .b-brand { display: none; flex: 1; font: 700 15px var(--round); color: var(--muted); }
+  .panel-b[data-phase="ready"] .b-brand { display: block; }
+  .b-err { margin: -6px 0 8px; }
+  .b-err:empty { display: none; }
+  .panel-b:not([data-phase="idle"]) .b-err { display: none; }
+  .b-fail { width: auto; margin: -4px 14px 12px; }
+  .b-progress { height: 5px; background: #EFE0C8; }
+  .b-progress span { display: block; height: 100%; width: calc(var(--p, 0) * 100%); background: linear-gradient(90deg, #D9A35A, #8B4513); }
+  .panel-b:not([data-phase="running"]) .b-progress { display: none; }
+  .panel-b .ph-ready { flex-direction: column; align-items: center; gap: 6px; padding: 0 18px 18px; }
+  .b-ready { font: 800 54px/1 var(--round); color: var(--ready-ink); }
+  .panel-b .ph-ready .btn { min-width: 150px; margin-top: 4px; }
+
+  /* C · Tea tag */
+  .panel-c { width: 200px; height: 300px; filter: drop-shadow(0 12px 16px rgba(40,25,10,.32)); }
+  .c-tag { position: relative; height: 100%; padding: 12px 14px 16px; background: #FBF3E4; clip-path: polygon(24px 0, 176px 0, 200px 24px, 200px 100%, 0 100%, 0 24px); display: flex; flex-direction: column; align-items: center; }
+  .c-tag::before { content: ""; position: absolute; inset: 9px; border: 1.5px dashed #D2B690; border-radius: 18px; pointer-events: none; }
+  .panel-c[data-phase="ready"] .c-tag { background: #F6D58E; }
+  .panel-c[data-phase="ready"] .c-tag::before { border-color: #C89A4C; }
+  .c-top { position: relative; width: 100%; height: 22px; display: flex; justify-content: center; align-items: center; }
+  .c-eyelet { width: 14px; height: 14px; border-radius: 50%; border: 3px solid #C9A27A; background: #EADBC3; }
+  .c-top .hide-btn { position: absolute; right: 2px; top: 0; }
+  .c-brand { font: 600 13px var(--serif); letter-spacing: .3em; color: var(--muted); margin: 4px 0 4px .3em; }
+  .c-ring-wrap { position: relative; width: 136px; height: 136px; flex: none; }
+  .ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: #EBDCC4; stroke-width: 8; }
+  .panel-c[data-phase="ready"] .ring-bg { stroke: #E3B45C; }
+  .ring-fg { fill: none; stroke: var(--brew); stroke-width: 8; stroke-linecap: round; stroke-dasharray: 326.73; stroke-dashoffset: 326.73; }
+  .panel-c[data-phase="idle"] .ring-fg { visibility: hidden; }
+  .c-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .c-center .ph { flex-direction: column; align-items: center; }
+  .c-in-row { display: flex; align-items: flex-start; gap: 3px; }
+  .c-in-row label { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+  .c-in-row .t-in { width: 40px; height: 36px; font-size: 20px; font-family: var(--serif); font-weight: 600; }
+  .c-in-row .colon { font: 600 20px/36px var(--serif); }
+  .c-time { font: 600 32px/1 var(--serif); font-variant-numeric: tabular-nums; }
+  .c-ready { font: italic 700 34px/1 var(--serif); color: var(--ready-ink); }
+  .c-bottom { margin-top: auto; width: 100%; }
+  .c-bottom .ph { flex-direction: column; align-items: center; gap: 6px; }
+  .c-bottom .btn { width: 100%; }
+  .panel-c[data-save="failed"] .c-brand { display: none; }
+  .panel-c .save-fail { position: relative; font-size: 11px; line-height: 1.3; padding: 5px 8px; }
+  .panel-c .save-fail strong { font-size: 12px; }
+  .panel-c[data-save="failed"] .c-bottom .btn { padding: 7px 14px; }
+
+  .sim-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 8px 10px; border-radius: 8px; border: 1px dashed #B9AFA3; background: #F7F4F0; font-size: 13px; }
+  .sim-tag { font-size: 11px; color: #6B625A; text-transform: uppercase; letter-spacing: .06em; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .steam path { animation: none !important; }
+    .tea { transition: none; }
+  }
+
+  .summary { max-width: 1240px; margin: 0 auto 40px; padding: 0 20px; }
+  .summary-box { background: #fff; border-radius: 12px; padding: 14px; max-width: 640px; }
+  .summary-box textarea { width: 100%; height: 70px; font: 14px var(--sans); padding: 8px; border-radius: 8px; border: 1px solid #B9AFA3; }
+</style>
+</head>
+<body>
+
+<header class="page-head">
+  <h1>Steep: three designs <span style="font-weight:500;color:var(--muted)">· revision 2</span></h1>
+  <p>All three designs have the same features. You type minutes and seconds, then press Start. The panel counts down and then shows a big <strong>Ready</strong> that stays until you dismiss it. A cup in the menu bar shows, hides or quits Steep. There are no sounds or notifications. The panels float over a pretend document, and you can drag them.</p>
+  <p class="recommend"><strong>Your pick so far: A · Mug.</strong> B and C are kept for comparison and have the same changes.<br>
+  <strong>Changed in revision 2:</strong> no “finished … ago” line under Ready. The time boxes are empty again after Cancel or Dismiss. Under each design there's a new <em>Pretend saving fails</em> switch. Turn it on and press Start to see the problem message. Your typed time stays, and Start becomes <em>Try again</em>. Turn the switch off and press Try again to start the timer.</p>
+  <div class="demo-controls" role="group" aria-label="Preview controls (not part of the app)">
+    <label><input type="checkbox" id="fast"> Fast demo (1 second = 1 minute)</label>
+    <button type="button" id="jump">Jump ahead 2 minutes <span>(as if your Mac slept or Steep was closed)</span></button>
+    <button type="button" id="resetAll">Reset all three</button>
+  </div>
+  <p class="sim-note">This is a simulation in your browser. The timers, menu bar and windows aren't real. Only the finished Mac app can show how it floats, moves between desktops and handles focus.</p>
+</header>
+
+<main class="options">
+
+  <!-- ================= A · Mug ================= -->
+  <section class="option" data-opt="A" aria-labelledby="a-h">
+    <div class="opt-head"><h2 id="a-h">A · Mug</h2><span class="size">panel 240 × 288</span></div>
+    <div class="stage">
+      <div class="menubar">
+        <span class="app-menus">Notes&nbsp;&nbsp; File&nbsp;&nbsp; Edit&nbsp;&nbsp; View</span><span class="spacer"></span>
+        <div class="mb-wrap">
+          <button type="button" class="mb-item" aria-haspopup="menu" aria-expanded="false" aria-label="Steep menu">
+            <svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1.5 3h10v5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z M11.5 5h1.3a1.8 1.8 0 0 1 0 3.6h-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span data-out="mb"></span>
+          </button>
+          <div class="mb-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-act="toggle">Hide Steep</button>
+            <hr>
+            <button type="button" role="menuitem" data-act="quit">Quit Steep</button>
+          </div>
+        </div>
+        <span class="clock">Sun 9:41</span>
+      </div>
+      <div class="work" aria-hidden="true"><i style="width:70%"></i><i></i><i style="width:88%"></i><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:45%"></i><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:55%"></i><i></i><i style="width:66%"></i></div>
+
+      <div class="panel panel-a" data-phase="idle" tabindex="-1" role="group" aria-label="Steep panel, design A">
+        <div class="a-top"><span class="brand">Steep</span><button type="button" class="hide-btn" data-act="hide" aria-label="Hide Steep panel" title="Hide (Esc)">–</button></div>
+        <svg class="mug" viewBox="0 0 120 96" aria-hidden="true">
+          <g class="steam"><path d="M46 20c-5-5 5-9 0-15"/><path d="M60 20c-5-5 5-9 0-15"/><path d="M74 20c-5-5 5-9 0-15"/></g>
+          <defs><clipPath id="a-clip"><path d="M26 30h68v38a18 18 0 0 1-18 18H44a18 18 0 0 1-18-18z"/></clipPath></defs>
+          <rect class="tea" data-out="tea" x="26" y="36" width="68" height="52" clip-path="url(#a-clip)"/>
+          <path class="mug-line" d="M26 30h68v38a18 18 0 0 1-18 18H44a18 18 0 0 1-18-18z"/>
+          <path class="mug-line" d="M94 42h6a10 10 0 0 1 0 20h-6"/>
+        </svg>
+        <div class="ph ph-idle">
+          <div class="a-inputs">
+            <label><input class="t-in" data-role="min" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="0" aria-label="Minutes"><span class="field-label">min</span></label>
+            <span class="colon" aria-hidden="true">:</span>
+            <label><input class="t-in" data-role="sec" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="00" aria-label="Seconds"><span class="field-label">sec</span></label>
+          </div>
+          <p class="err" data-out="error" role="alert"></p>
+          <div class="save-fail" data-out="savefail" role="alert" hidden></div>
+          <button type="button" class="btn primary" data-act="start" data-label="Start steeping">Start steeping</button>
+        </div>
+        <div class="ph ph-running">
+          <div class="a-time" data-out="time">0:00</div>
+          <div class="sub">left of <span data-out="total">0:00</span></div>
+          <button type="button" class="btn ghost" data-act="cancel">Cancel</button>
+        </div>
+        <div class="ph ph-ready">
+          <div class="a-ready">Ready</div>
+          <button type="button" class="btn primary" data-act="dismiss">Dismiss</button>
+        </div>
+      </div>
+
+      <p class="stage-note hidden-note" hidden>Steep is hidden and the timer keeps going.<br>Reopen it from the cup in the menu bar.</p>
+      <div class="stage-note quit-note" hidden>Steep has quit (simulated). The finish time is saved.<br><button type="button" data-act="relaunch">Open Steep again</button></div>
+      <p class="sr live" aria-live="polite"></p>
+    </div>
+    <div class="sim-row" role="group" aria-label="Preview control (not part of the app)">
+      <label><input type="checkbox" data-sim="fail"> Pretend saving fails when Start is pressed</label>
+      <span class="sim-tag">preview only</span>
+    </div>
+    <p class="why"><strong>Good for:</strong> reading from a distance and having some character. The mug shows the tea darkening as it steeps. <strong>Cost:</strong> it's the tallest of the three, so it covers more of whatever is behind it.</p>
+    <button type="button" class="choose" data-choose="A">Choose A</button>
+  </section>
+
+  <!-- ================= B · Strip ================= -->
+  <section class="option" data-opt="B" aria-labelledby="b-h">
+    <div class="opt-head"><h2 id="b-h">B · Strip</h2><span class="size">panel 340 × 68, grows to about 180 when Ready</span></div>
+    <div class="stage">
+      <div class="menubar">
+        <span class="app-menus">Notes&nbsp;&nbsp; File&nbsp;&nbsp; Edit&nbsp;&nbsp; View</span><span class="spacer"></span>
+        <div class="mb-wrap">
+          <button type="button" class="mb-item" aria-haspopup="menu" aria-expanded="false" aria-label="Steep menu">
+            <svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1.5 3h10v5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z M11.5 5h1.3a1.8 1.8 0 0 1 0 3.6h-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span data-out="mb"></span>
+          </button>
+          <div class="mb-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-act="toggle">Hide Steep</button>
+            <hr>
+            <button type="button" role="menuitem" data-act="quit">Quit Steep</button>
+          </div>
+        </div>
+        <span class="clock">Sun 9:41</span>
+      </div>
+      <div class="work" aria-hidden="true"><i style="width:70%"></i><i></i><i style="width:88%"></i><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:45%"></i><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:55%"></i><i></i><i style="width:66%"></i></div>
+
+      <div class="panel panel-b" data-phase="idle" tabindex="-1" role="group" aria-label="Steep panel, design B">
+        <div class="b-row">
+          <svg class="b-cup" viewBox="0 0 30 28" aria-hidden="true">
+            <defs><clipPath id="b-clip"><path d="M3 7h19v9a8 8 0 0 1-8 8h-3a8 8 0 0 1-8-8z"/></clipPath></defs>
+            <rect class="tea" data-out="tea" x="3" y="9" width="19" height="16" clip-path="url(#b-clip)"/>
+            <path class="mug-line" style="stroke-width:2.2" d="M3 7h19v9a8 8 0 0 1-8 8h-3a8 8 0 0 1-8-8z M22 10h2a4 4 0 0 1 0 8h-2"/>
+          </svg>
+          <span class="b-brand">Steep</span>
+          <div class="ph ph-idle">
+            <label class="b-field"><input class="t-in" data-role="min" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="0" aria-label="Minutes"><span class="field-label">min</span></label>
+            <label class="b-field"><input class="t-in" data-role="sec" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="00" aria-label="Seconds"><span class="field-label">sec</span></label>
+            <button type="button" class="btn primary" data-act="start" data-label="Start">Start</button>
+          </div>
+          <div class="ph ph-running">
+            <span class="b-time" data-out="time">0:00</span>
+            <span class="sub">left of <span data-out="total">0:00</span></span>
+            <button type="button" class="btn ghost" data-act="cancel">Cancel</button>
+          </div>
+          <button type="button" class="hide-btn" data-act="hide" aria-label="Hide Steep panel" title="Hide (Esc)">–</button>
+        </div>
+        <p class="err b-err" data-out="error" role="alert"></p>
+        <div class="save-fail b-fail" data-out="savefail" role="alert" hidden></div>
+        <div class="b-progress" aria-hidden="true"><span></span></div>
+        <div class="ph ph-ready">
+          <div class="b-ready">Ready</div>
+          <button type="button" class="btn primary" data-act="dismiss">Dismiss</button>
+        </div>
+      </div>
+
+      <p class="stage-note hidden-note" hidden>Steep is hidden and the timer keeps going.<br>Reopen it from the cup in the menu bar.</p>
+      <div class="stage-note quit-note" hidden>Steep has quit (simulated). The finish time is saved.<br><button type="button" data-act="relaunch">Open Steep again</button></div>
+      <p class="sr live" aria-live="polite"></p>
+    </div>
+    <div class="sim-row" role="group" aria-label="Preview control (not part of the app)">
+      <label><input type="checkbox" data-sim="fail"> Pretend saving fails when Start is pressed</label>
+      <span class="sim-tag">preview only</span>
+    </div>
+    <p class="why"><strong>Good for:</strong> staying out of your way. It's a slim bar that covers only a line or two of your work, then grows into a big Ready banner when the tea is done. <strong>Cost:</strong> the countdown is smaller than in A, and it has the least character of the three.</p>
+    <button type="button" class="choose" data-choose="B">Choose B</button>
+  </section>
+
+  <!-- ================= C · Tea tag ================= -->
+  <section class="option" data-opt="C" aria-labelledby="c-h">
+    <div class="opt-head"><h2 id="c-h">C · Tea tag</h2><span class="size">panel 200 × 300</span></div>
+    <div class="stage">
+      <div class="menubar">
+        <span class="app-menus">Notes&nbsp;&nbsp; File&nbsp;&nbsp; Edit&nbsp;&nbsp; View</span><span class="spacer"></span>
+        <div class="mb-wrap">
+          <button type="button" class="mb-item" aria-haspopup="menu" aria-expanded="false" aria-label="Steep menu">
+            <svg viewBox="0 0 16 14" aria-hidden="true"><path d="M1.5 3h10v5a4 4 0 0 1-4 4h-2a4 4 0 0 1-4-4z M11.5 5h1.3a1.8 1.8 0 0 1 0 3.6h-1.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            <span data-out="mb"></span>
+          </button>
+          <div class="mb-menu" role="menu" hidden>
+            <button type="button" role="menuitem" data-act="toggle">Hide Steep</button>
+            <hr>
+            <button type="button" role="menuitem" data-act="quit">Quit Steep</button>
+          </div>
+        </div>
+        <span class="clock">Sun 9:41</span>
+      </div>
+      <div class="work" aria-hidden="true"><i style="width:70%"></i><i></i><i style="width:88%"></i><i style="width:60%"></i><i></i><i style="width:80%"></i><i style="width:45%"></i><i></i><i style="width:75%"></i><i style="width:90%"></i><i style="width:55%"></i><i></i><i style="width:66%"></i></div>
+
+      <div class="panel panel-c" data-phase="idle" tabindex="-1" role="group" aria-label="Steep panel, design C">
+        <div class="c-tag">
+          <div class="c-top"><span class="c-eyelet" aria-hidden="true"></span><button type="button" class="hide-btn" data-act="hide" aria-label="Hide Steep panel" title="Hide (Esc)">–</button></div>
+          <div class="c-brand">STEEP</div>
+          <div class="c-ring-wrap">
+            <svg class="ring" viewBox="0 0 120 120" aria-hidden="true"><circle class="ring-bg" cx="60" cy="60" r="52"/><circle class="ring-fg" data-out="ring" cx="60" cy="60" r="52"/></svg>
+            <div class="c-center">
+              <div class="ph ph-idle">
+                <div class="c-in-row">
+                  <label><input class="t-in" data-role="min" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="0" aria-label="Minutes"><span class="field-label">min</span></label>
+                  <span class="colon" aria-hidden="true">:</span>
+                  <label><input class="t-in" data-role="sec" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="00" aria-label="Seconds"><span class="field-label">sec</span></label>
+                </div>
+              </div>
+              <div class="ph ph-running"><span class="c-time" data-out="time">0:00</span><span class="sub">left</span></div>
+              <div class="ph ph-ready"><span class="c-ready">Ready</span></div>
+            </div>
+          </div>
+          <div class="c-bottom">
+            <div class="ph ph-idle"><p class="err" data-out="error" role="alert"></p><div class="save-fail" data-out="savefail" role="alert" hidden></div><button type="button" class="btn primary" data-act="start" data-label="Start">Start</button></div>
+            <div class="ph ph-running"><span class="sub">of <span data-out="total">0:00</span></span><button type="button" class="btn ghost" data-act="cancel">Cancel</button></div>
+            <div class="ph ph-ready"><button type="button" class="btn primary" data-act="dismiss">Dismiss</button></div>
+          </div>
+        </div>
+      </div>
+
+      <p class="stage-note hidden-note" hidden>Steep is hidden and the timer keeps going.<br>Reopen it from the cup in the menu bar.</p>
+      <div class="stage-note quit-note" hidden>Steep has quit (simulated). The finish time is saved.<br><button type="button" data-act="relaunch">Open Steep again</button></div>
+      <p class="sr live" aria-live="polite"></p>
+    </div>
+    <div class="sim-row" role="group" aria-label="Preview control (not part of the app)">
+      <label><input type="checkbox" data-sim="fail"> Pretend saving fails when Start is pressed</label>
+      <span class="sim-tag">preview only</span>
+    </div>
+    <p class="why"><strong>Good for:</strong> the most personality. It's shaped like the paper tag on a tea bag, with a ring that fills as the tea steeps. <strong>Cost:</strong> the time is smaller than in A, and the unusual shape draws a little more attention to itself.</p>
+    <button type="button" class="choose" data-choose="C">Choose C</button>
+  </section>
+</main>
+
+<section class="summary" aria-live="polite">
+  <div class="summary-box" id="summaryBox" hidden>
+    <p style="margin:0 0 6px"><strong>Copy this into our chat.</strong> The Choose buttons don't send anything or approve anything.</p>
+    <label class="sr" for="summaryText">Choice summary</label>
+    <textarea id="summaryText" readonly></textarea>
+  </div>
+</section>
+
+<noscript><p style="text-align:center">These previews need JavaScript to be interactive.</p></noscript>
+
+<script>
+(() => {
+  'use strict';
+  const $ = (root, sel) => root.querySelector(sel);
+  const $$ = (root, sel) => Array.from(root.querySelectorAll(sel));
+
+  // Simulated clock: real time, optionally sped up, plus manual jumps.
+  let vt = Date.now();
+  let lastReal = performance.now();
+  let speed = 1;
+  function advance() {
+    const t = performance.now();
+    vt += (t - lastReal) * speed;
+    lastReal = t;
+  }
+
+  const RING = 326.73;
+  const EMPTY = '#F7EEDD';
+  const LIGHT = [232, 201, 138];
+  const DARK = [122, 62, 20];
+  const teaColor = p => 'rgb(' + LIGHT.map((c, i) => Math.round(c + (DARK[i] - c) * p)).join(',') + ')';
+  const fmt = totalSec => Math.floor(totalSec / 60) + ':' + String(totalSec % 60).padStart(2, '0');
+  function parseField(v) {
+    v = v.trim();
+    if (v === '') return 0;
+    return /^\d{1,2}$/.test(v) ? Number(v) : NaN;
+  }
+
+  const opts = $$(document, '.option').map(setup);
+
+  function setup(sec) {
+    const o = {
+      sec,
+      stage: $(sec, '.stage'),
+      panel: $(sec, '.panel'),
+      min: $(sec, '[data-role=min]'),
+      secIn: $(sec, '[data-role=sec]'),
+      err: $(sec, '[data-out=error]'),
+      mbWrap: $(sec, '.mb-wrap'),
+      mbBtn: $(sec, '.mb-item'),
+      mbText: $(sec, '[data-out=mb]'),
+      menu: $(sec, '.mb-menu'),
+      toggleItem: $(sec, '[data-act=toggle]'),
+      hiddenNote: $(sec, '.hidden-note'),
+      quitNote: $(sec, '.quit-note'),
+      live: $(sec, '.live'),
+      startBtn: $(sec, '[data-act=start]'),
+      saveFail: $(sec, '[data-out=savefail]'),
+      failToggle: $(sec, '[data-sim=fail]'),
+      phase: 'idle', endAt: 0, dur: 0, visible: true, appOn: true, failed: 0
+    };
+
+    sec.addEventListener('click', e => {
+      const b = e.target.closest('[data-act]');
+      if (b && sec.contains(b)) act(o, b.dataset.act);
+    });
+    [o.min, o.secIn].forEach(inp => {
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); start(o); } });
+      inp.addEventListener('input', () => clearErr(o));
+    });
+    o.panel.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { e.preventDefault(); hide(o); o.mbBtn.focus(); }
+      else if (e.key === 'Enter' && o.phase === 'ready' && !e.target.closest('button')) { e.preventDefault(); dismiss(o); }
+    });
+    o.mbBtn.addEventListener('click', e => { e.stopPropagation(); o.menu.hidden ? openMenu(o) : closeMenu(o); });
+    o.menu.addEventListener('keydown', e => {
+      const items = $$(o.menu, 'button');
+      const i = items.indexOf(document.activeElement);
+      if (e.key === 'Escape') { e.preventDefault(); closeMenu(o); o.mbBtn.focus(); }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    });
+    enableDrag(o);
+    render(o);
+    placeInitial(o);
+    return o;
+  }
+
+  function act(o, a) {
+    advance();
+    switch (a) {
+      case 'start': start(o); break;
+      case 'cancel': o.phase = 'idle'; clearFields(o); render(o); clampPanel(o); o.min.focus(); break;
+      case 'dismiss': dismiss(o); break;
+      case 'hide': hide(o); o.mbBtn.focus(); break;
+      case 'toggle': closeMenu(o); if (o.visible) { hide(o); o.mbBtn.focus(); } else { show(o); } break;
+      case 'quit': closeMenu(o); quit(o); break;
+      case 'relaunch': relaunch(o); break;
+    }
+  }
+
+  function clearErr(o) {
+    o.err.textContent = '';
+    o.min.removeAttribute('aria-invalid');
+    o.secIn.removeAttribute('aria-invalid');
+  }
+
+  // Shown when the timer couldn't be saved. Typed values stay in the boxes.
+  function setSaveFailed(o, count) {
+    o.failed = count;
+    o.saveFail.replaceChildren();
+    if (count) {
+      const title = document.createElement('strong');
+      title.textContent = count > 1 ? 'Still couldn’t save, so not started.' : 'Couldn’t save, so not started.';
+      o.saveFail.append(title, 'Your time is still here. Try again.');
+      o.panel.dataset.save = 'failed';
+    } else {
+      delete o.panel.dataset.save;
+    }
+    o.saveFail.hidden = !count;
+    o.startBtn.textContent = count ? 'Try again' : o.startBtn.dataset.label;
+  }
+
+  function clearFields(o) {
+    o.min.value = '';
+    o.secIn.value = '';
+    clearErr(o);
+    setSaveFailed(o, 0);
+  }
+
+  function start(o) {
+    advance();
+    const m = parseField(o.min.value);
+    const s = parseField(o.secIn.value);
+    let msg = '', bad = null;
+    if (Number.isNaN(m)) { msg = 'Use numbers only'; bad = o.min; }
+    else if (Number.isNaN(s)) { msg = 'Use numbers only'; bad = o.secIn; }
+    else if (s > 59) { msg = 'Seconds go up to 59'; bad = o.secIn; }
+    else if (m * 60 + s === 0) { msg = 'Type a time above zero'; bad = o.min; }
+    if (msg) {
+      clearErr(o);
+      setSaveFailed(o, 0);
+      o.err.textContent = msg;
+      bad.setAttribute('aria-invalid', 'true');
+      bad.focus();
+      clampPanel(o);
+      return;
+    }
+    clearErr(o);
+    if (o.failToggle.checked) {
+      // Simulated failed save: nothing starts, nothing typed is lost.
+      setSaveFailed(o, o.failed + 1);
+      clampPanel(o);
+      return;
+    }
+    setSaveFailed(o, 0);
+    o.dur = (m * 60 + s) * 1000;
+    o.endAt = vt + o.dur;
+    o.phase = 'running';
+    render(o);
+    clampPanel(o);
+    o.panel.focus({ preventScroll: true });
+  }
+
+  function dismiss(o) {
+    o.phase = 'idle';
+    o.live.textContent = '';
+    clearFields(o);
+    render(o);
+    clampPanel(o);
+    o.min.focus();
+  }
+  function hide(o) { o.visible = false; render(o); }
+  function show(o) {
+    o.visible = true;
+    render(o);
+    clampPanel(o);
+    o.panel.focus({ preventScroll: true });
+  }
+  function quit(o) {
+    o.appOn = false;
+    o.live.textContent = '';
+    clearFields(o); // typed but unstarted times aren't saved
+    render(o);
+    $(o.quitNote, 'button').focus();
+  }
+  function relaunch(o) {
+    // The saved finish time decides what Steep shows on reopening.
+    advance();
+    if (o.phase === 'running' && vt >= o.endAt) o.phase = 'ready';
+    o.appOn = true;
+    o.visible = true;
+    render(o);
+    clampPanel(o);
+    o.panel.focus({ preventScroll: true });
+  }
+
+  function openMenu(o) {
+    opts.forEach(x => { if (x !== o) closeMenu(x); });
+    o.menu.hidden = false;
+    o.mbBtn.setAttribute('aria-expanded', 'true');
+    $(o.menu, 'button').focus();
+  }
+  function closeMenu(o) {
+    o.menu.hidden = true;
+    o.mbBtn.setAttribute('aria-expanded', 'false');
+  }
+  document.addEventListener('click', e => {
+    opts.forEach(o => { if (!o.mbWrap.contains(e.target)) closeMenu(o); });
+  });
+
+  function setOut(o, key, value) {
+    $$(o.sec, '[data-out=' + key + ']').forEach(el => { if (el.textContent !== value) el.textContent = value; });
+  }
+
+  function render(o) {
+    const remainMs = Math.max(0, o.endAt - vt);
+    const remain = Math.ceil(remainMs / 1000);
+    const p = o.phase === 'running' ? Math.min(1, Math.max(0, 1 - remainMs / o.dur)) : (o.phase === 'ready' ? 1 : 0);
+    if (o.panel.dataset.phase !== o.phase) o.panel.dataset.phase = o.phase;
+    setOut(o, 'time', fmt(remain));
+    setOut(o, 'total', fmt(Math.round(o.dur / 1000)));
+    const mb = o.phase === 'running' ? fmt(remain) : (o.phase === 'ready' ? 'Ready' : '');
+    if (o.mbText.textContent !== mb) {
+      o.mbText.textContent = mb;
+      o.mbBtn.setAttribute('aria-label', 'Steep menu' + (mb ? ', ' + mb : ''));
+    }
+    o.panel.style.setProperty('--p', p);
+    $$(o.sec, '[data-out=tea]').forEach(el => { el.style.fill = o.phase === 'idle' ? EMPTY : teaColor(p); });
+    const ring = $(o.sec, '[data-out=ring]');
+    if (ring) ring.style.strokeDashoffset = String(RING * (1 - p));
+    o.panel.hidden = !(o.appOn && o.visible);
+    o.hiddenNote.hidden = !(o.appOn && !o.visible);
+    o.quitNote.hidden = o.appOn;
+    o.mbWrap.hidden = !o.appOn;
+    const label = o.visible ? 'Hide Steep' : 'Show Steep';
+    if (o.toggleItem.textContent !== label) o.toggleItem.textContent = label;
+  }
+
+  function tick() {
+    advance();
+    opts.forEach(o => {
+      if (o.phase === 'running' && vt >= o.endAt) {
+        o.phase = 'ready';
+        render(o);
+        if (o.appOn) {
+          clampPanel(o);
+          o.live.textContent = 'Your tea is ready.';
+        }
+      } else {
+        render(o);
+      }
+    });
+  }
+  setInterval(tick, 200);
+
+  // Dragging and keeping the panel on the "screen".
+  function moveTo(o, x, y) {
+    const maxX = o.stage.clientWidth - o.panel.offsetWidth;
+    const maxY = o.stage.clientHeight - o.panel.offsetHeight;
+    x = Math.max(0, Math.min(maxX, x));
+    y = Math.max(28, Math.min(Math.max(28, maxY), y));
+    o.panel.style.left = Math.round(x) + 'px';
+    o.panel.style.top = Math.round(y) + 'px';
+  }
+  function clampPanel(o) {
+    if (!o.panel.hidden) moveTo(o, o.panel.offsetLeft, o.panel.offsetTop);
+  }
+  function placeInitial(o) {
+    moveTo(o, (o.stage.clientWidth - o.panel.offsetWidth) / 2, 56);
+  }
+  function enableDrag(o) {
+    let sx = 0, sy = 0, ox = 0, oy = 0, dragging = false;
+    o.panel.addEventListener('pointerdown', e => {
+      if (e.button !== 0 || e.target.closest('input, button')) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY; ox = o.panel.offsetLeft; oy = o.panel.offsetTop;
+      o.panel.setPointerCapture(e.pointerId);
+      o.panel.classList.add('dragging');
+    });
+    o.panel.addEventListener('pointermove', e => {
+      if (dragging) moveTo(o, ox + e.clientX - sx, oy + e.clientY - sy);
+    });
+    const end = () => { dragging = false; o.panel.classList.remove('dragging'); };
+    o.panel.addEventListener('pointerup', end);
+    o.panel.addEventListener('pointercancel', end);
+  }
+  window.addEventListener('resize', () => opts.forEach(clampPanel));
+
+  // Preview controls (outside the app frames).
+  $(document, '#fast').addEventListener('change', e => { advance(); speed = e.target.checked ? 60 : 1; });
+  $(document, '#jump').addEventListener('click', () => { advance(); vt += 120000; tick(); });
+  $(document, '#resetAll').addEventListener('click', () => {
+    opts.forEach(o => {
+      closeMenu(o);
+      o.failToggle.checked = false;
+      clearFields(o);
+      o.phase = 'idle'; o.endAt = 0; o.dur = 0; o.visible = true; o.appOn = true;
+      o.live.textContent = '';
+      render(o);
+      placeInitial(o);
+    });
+  });
+
+  const names = { A: 'A · Mug', B: 'B · Strip', C: 'C · Tea tag' };
+  $$(document, '[data-choose]').forEach(b => b.addEventListener('click', () => {
+    const box = $(document, '#summaryBox');
+    const out = $(document, '#summaryText');
+    out.value = 'For Steep I\'d like option ' + names[b.dataset.choose] + ' (revision 2).\nChanges (optional): ';
+    box.hidden = false;
+    out.focus();
+  }));
+})();
+</script>
+</body>
+</html>

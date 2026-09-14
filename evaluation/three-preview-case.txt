@@ -1,0 +1,7 @@
+One independent conversation follows. Write ONLY the actual next assistant response.
+This environment supports text responses only; do not claim tool actions.
+
+AA. Context: The job, behavior and data for a local specimen reference utility are
+settled. The user asked for a joyful, vivid field notebook. You described three
+structural directions in prose: notebook spread, field tray, and card stack. No
+HTML has been created or seen. User: "The field tray sounds promising. What next?"

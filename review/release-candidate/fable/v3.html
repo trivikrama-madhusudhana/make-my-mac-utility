@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Frame Names — three design options (revision 2, camera archive)</title>
+<style>
+  /* Shared archive palette: camera-body charcoal, brass, archival cream, film red. */
+  :root {
+    --desk: #cfc9bd;
+    --desk-ink: #2a2620;
+    --desk-muted: #5c554a;
+    --body: #1f1c18;          /* camera body */
+    --body-2: #2a2621;        /* leatherette lighter */
+    --body-line: #3d3830;
+    --brass: #d9a441;
+    --brass-deep: #b8862d;
+    --brass-text: #1a1408;
+    --cream: #f6efdd;         /* archival card */
+    --cream-2: #eee5cf;
+    --cream-line: #d8cdb2;
+    --ink: #221d16;
+    --ink-muted: #6d6252;
+    --film-red: #c2452d;
+    --film-red-bg: #fbe4de;
+    --leaf: #2f7a4a;
+    --leaf-bg: #dff0e2;
+    --paper-text-light: #f2eadb;
+    --focus: #ffcf66;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --serif: "Iowan Old Style", "Palatino", "Book Antiqua", Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--desk); color: var(--desk-ink); font-family: var(--sans); font-size: 13px; line-height: 1.45;
+    background-image: radial-gradient(circle at 20% 0%, #e2ddd1 0, transparent 55%), radial-gradient(circle at 90% 100%, #b9b1a3 0, transparent 50%); }
+  header { padding: 22px 28px 8px; max-width: 1500px; margin: 0 auto; }
+  header h1 { font-size: 22px; margin: 0 0 6px; font-family: var(--serif); letter-spacing: .01em; }
+  header p { margin: 4px 0; color: var(--desk-muted); max-width: 960px; }
+  .options { display: flex; flex-wrap: wrap; gap: 34px; padding: 12px 28px 48px; max-width: 1500px; margin: 0 auto; align-items: flex-start; }
+  .option { display: flex; flex-direction: column; gap: 10px; }
+  .option > h2 { font-size: 16px; margin: 0; font-family: var(--serif); }
+  .option > h2 span { color: var(--desk-muted); font-weight: normal; font-family: var(--sans); font-size: 13px; }
+  .option .why { margin: 0; color: var(--desk-muted); max-width: 660px; }
+  .demo-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .demo-controls span { color: var(--desk-muted); margin-right: 4px; }
+  .demo-controls button { font: inherit; font-size: 12px; padding: 3px 9px; border-radius: 6px; border: 1px solid #a9a193; background: #f3efe6; color: var(--desk-ink); cursor: pointer; }
+  .demo-controls button:focus-visible, .window button:focus-visible, .window input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  .choose-summary { width: 100%; max-width: 660px; min-height: 64px; font: inherit; font-size: 12px; padding: 6px; border-radius: 6px; border: 1px solid #a9a193; background: #f3efe6; color: var(--desk-ink); }
+  .note { font-size: 11px; color: var(--desk-muted); }
+
+  /* window chrome */
+  .window { border-radius: 11px; box-shadow: 0 18px 40px rgba(20,15,5,.35), 0 0 0 1px rgba(0,0,0,.35); display: flex; flex-direction: column; overflow: hidden; flex-shrink: 0; background: var(--body); }
+  .titlebar { height: 30px; display: flex; align-items: center; padding: 0 10px; position: relative; background: linear-gradient(#36312b, #262219); border-bottom: 1px solid #0f0d0a; }
+  .lights { display: flex; gap: 7px; }
+  .lights i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+  .lights i:nth-child(1) { background: #ff5f57; } .lights i:nth-child(2) { background: #febc2e; } .lights i:nth-child(3) { background: #28c840; }
+  .titlebar .title { position: absolute; left: 0; right: 0; text-align: center; font-weight: 600; color: #cfc4ad; pointer-events: none; font-family: var(--serif); letter-spacing: .06em; font-size: 13px; }
+  .body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+
+  /* controls */
+  .btn { font: inherit; padding: 5px 13px; border-radius: 6px; border: 1px solid #5a5044; background: #3a342c; color: var(--paper-text-light); cursor: pointer; white-space: nowrap; font-weight: 500; }
+  .btn:hover:not(:disabled) { background: #46403a; }
+  .btn.primary { background: linear-gradient(#e6b652, var(--brass)); color: var(--brass-text); border-color: #8f6a22; font-weight: 700; letter-spacing: .02em; box-shadow: inset 0 1px 0 rgba(255,255,255,.35); }
+  .btn.primary:hover:not(:disabled) { background: linear-gradient(#f0c15c, #dca948); }
+  .btn:disabled { opacity: .4; cursor: default; }
+  .btn.big { padding: 9px 16px; font-size: 14px; }
+  .btn.link { border: none; background: none; color: var(--brass); padding: 2px 4px; }
+  .btn.link:disabled { color: #8a8070; }
+  .btn.on-cream { background: #fffaf0; color: var(--ink); border-color: #b9ad93; }
+  .btn.on-cream:hover:not(:disabled) { background: #fff; }
+  .btn.link.on-cream { background: none; border: none; color: var(--brass-deep); }
+  .kbd { font-family: var(--mono); font-size: 10.5px; opacity: .7; margin-left: 6px; font-weight: 400; }
+  label.field { display: flex; align-items: center; gap: 8px; }
+  label.field.stack { flex-direction: column; align-items: stretch; gap: 5px; }
+  label.field > span.lab { font-size: 11px; text-transform: uppercase; letter-spacing: .1em; color: #bfb39a; font-weight: 600; }
+  input.code { font-family: var(--mono); font-size: 15px; padding: 6px 10px; border-radius: 6px; border: 1px solid #6a5f4e; background: #15130f; color: #ffe7b0; min-width: 150px; letter-spacing: .06em; text-transform: uppercase; box-shadow: inset 0 2px 4px rgba(0,0,0,.5); }
+  input.code::placeholder { color: #7d7059; text-transform: none; letter-spacing: 0; }
+  input.code[aria-invalid="true"] { border-color: var(--film-red); box-shadow: inset 0 2px 4px rgba(0,0,0,.5), 0 0 0 2px rgba(194,69,45,.35); }
+  .hint { color: #bfb39a; font-size: 12px; }
+  .hint.bad { color: #ff8c73; }
+
+  .message { padding: 7px 11px; border-radius: 6px; font-size: 12.5px; border: 1px solid transparent; }
+  .message.ok { background: var(--leaf-bg); color: #1e5c36; border-color: #a9d4b5; }
+  .message.bad { background: var(--film-red-bg); color: #8f2c1b; border-color: #efb9ad; }
+  .message.quiet { background: var(--cream-2); color: var(--ink-muted); border-color: var(--cream-line); }
+  .message.dark.quiet { background: #2a2621; color: #cfc4ad; border-color: #3d3830; }
+  .message.dark.ok { background: #1f3a29; color: #b9e6c5; border-color: #2f7a4a; }
+  .message.dark.bad { background: #4a1f16; color: #ffc4b7; border-color: #c2452d; }
+
+  /* archival ledger table (Options A and B) */
+  .ledger { background: var(--cream); color: var(--ink); flex: 1; min-height: 0; display: flex; flex-direction: column;
+    background-image: repeating-linear-gradient(0deg, transparent 0 31px, rgba(120,100,60,.08) 31px 32px); }
+  .scroll { overflow: auto; flex: 1; min-height: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; font-family: var(--serif); font-weight: 600; font-style: italic; color: var(--ink-muted); padding: 7px 10px; border-bottom: 2px solid #b39b6a; position: sticky; top: 0; background: var(--cream); font-size: 12.5px; }
+  tbody td { padding: 7px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 280px; border-bottom: 1px solid var(--cream-line); height: 32px; }
+  td.frame { font-family: var(--mono); color: var(--brass-deep); font-weight: 700; width: 44px; text-align: right; }
+  td.old { color: var(--ink-muted); }
+  td.arrow { color: #b39b6a; text-align: center; width: 26px; font-size: 15px; }
+  td.new { font-family: var(--mono); font-weight: 700; color: var(--ink); letter-spacing: .02em; }
+  td.status { color: var(--ink-muted); width: 118px; font-style: italic; font-family: var(--serif); }
+  tr.conflict td.status, tr.conflict td.new { color: var(--film-red); }
+  tr.conflict td { background: #fbeae5; }
+  tr.same td { opacity: .55; }
+  tr.renamed td.status { color: var(--leaf); }
+  tr.renamed td.frame::after { content: ' ✓'; color: var(--leaf); }
+
+  .empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 20px; }
+  .empty .frame-icon { width: 92px; height: 66px; border: 3px solid #b39b6a; border-radius: 4px; position: relative; opacity: .8; }
+  .empty .frame-icon::before { content: ''; position: absolute; left: 28px; top: 10px; width: 34px; height: 34px; border: 3px solid #b39b6a; border-radius: 50%; }
+  .empty .frame-icon::after { content: ''; position: absolute; right: 8px; top: 6px; width: 10px; height: 6px; background: #b39b6a; border-radius: 1px; }
+  .empty .lead { font-family: var(--serif); font-size: 16px; color: var(--ink); }
+  .empty.dark .lead { color: #f2eadb; }
+  .empty .hint { color: var(--ink-muted); }
+  .empty.dark .hint { color: #bfb39a; }
+
+  /* Option A — Ledger: charcoal top strip, cream ledger, brass rename */
+  .A .toolbar { display: flex; align-items: center; gap: 16px; padding: 12px 14px; background: var(--body); border-bottom: 1px solid #0f0d0a; }
+  .A .toolbar .grow { flex: 1; }
+  .A .counter { font-family: var(--mono); color: #bfb39a; font-size: 12px; text-align: right; line-height: 1.3; }
+  .A .counter b { color: var(--brass); font-size: 16px; display: block; }
+  .A .footer { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--cream-2); border-top: 2px solid #b39b6a; }
+  .A .footer .msg { flex: 1; min-width: 0; }
+
+  /* Option B — Darkroom steps: dark dial column, cream preview */
+  .B .body { flex-direction: row; }
+  .B .side { width: 256px; padding: 16px; display: flex; flex-direction: column; gap: 18px; background: linear-gradient(180deg, #2a2621, #1c1915); border-right: 1px solid #0f0d0a; color: var(--paper-text-light); }
+  .B .step { display: flex; flex-direction: column; gap: 7px; }
+  .B .step h3 { margin: 0; display: flex; align-items: center; gap: 9px; font-size: 12px; color: #bfb39a; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; }
+  .B .step h3 .dial { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--brass); color: var(--brass); display: inline-flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 700; }
+  .B .step.active h3 .dial { background: var(--brass); color: var(--brass-text); }
+  .B .step .sub { font-size: 12px; color: #a99d85; }
+  .B .main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .B .main .msgbar { padding: 9px 12px; background: var(--cream-2); border-bottom: 1px solid var(--cream-line); min-height: 40px; }
+  .B .side .spacer { flex: 1; }
+  .B .side .brand { font-family: var(--serif); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #7d7059; }
+
+  /* Option C — Film strip: whole window dark, rows are frames */
+  .C .top { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px; background: var(--body); border-bottom: 1px solid #0f0d0a; }
+  .C .top .row { display: flex; align-items: center; gap: 8px; }
+  .C .top input.code { flex: 1; min-width: 0; }
+  .C .strip { background: #0e0c0a; flex: 1; min-height: 0; overflow: auto; padding: 6px 0;
+    background-image: repeating-linear-gradient(180deg, transparent 0 9px, #2c2822 9px 15px, transparent 15px 22px), repeating-linear-gradient(180deg, transparent 0 9px, #2c2822 9px 15px, transparent 15px 22px);
+    background-size: 10px 22px, 10px 22px; background-position: 6px 0, right 6px top 0; background-repeat: repeat-y, repeat-y; }
+  .C ul.list { list-style: none; margin: 0 22px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .C ul.list li { padding: 8px 10px; display: flex; align-items: center; gap: 10px; background: var(--cream); color: var(--ink); border-radius: 3px; border: 1px solid #b39b6a; }
+  .C ul.list li .fr { font-family: var(--mono); font-weight: 700; color: var(--brass-deep); font-size: 12px; width: 26px; }
+  .C ul.list li .names { flex: 1; min-width: 0; }
+  .C ul.list li .n { font-family: var(--mono); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+  .C ul.list li .o { color: var(--ink-muted); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-style: italic; font-family: var(--serif); }
+  .C ul.list li .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: var(--cream-2); color: var(--ink-muted); white-space: nowrap; border: 1px solid var(--cream-line); }
+  .C ul.list li.conflict { background: #fbeae5; border-color: var(--film-red); }
+  .C ul.list li.conflict .n, .C ul.list li.conflict .badge { color: var(--film-red); }
+  .C ul.list li.conflict .badge { background: var(--film-red-bg); border-color: #efb9ad; }
+  .C ul.list li.renamed .badge { color: var(--leaf); background: var(--leaf-bg); border-color: #a9d4b5; }
+  .C ul.list li.same { opacity: .55; }
+  .C .bottom { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px; background: var(--body); border-top: 1px solid #0f0d0a; }
+  .C .bottom .row { display: flex; align-items: center; gap: 8px; }
+  .C .bottom .row .grow { flex: 1; }
+
+  @media (max-width: 980px) { .options { flex-direction: column; } .window { max-width: 100%; } }
+  @media (prefers-reduced-motion: no-preference) { .btn { transition: background .12s, opacity .12s; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Frame Names — three design options, revision 2</h1>
+  <p>Camera-archive look: charcoal camera body, brass controls, cream archival ledger, film-red warnings. Each window is a working mock with sample photo names. Type a code, press Return or Rename, then Undo. Nothing is renamed on disk; every outcome is <strong>simulated</strong>. The buttons above each window switch it into its empty, "target occupied" or "undo blocked" state. Choose one option, or tell me which parts to combine.</p>
+</header>
+<div class="options" id="options"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  var FOLDER = 'Cameras/2026-09';
+  var SAMPLE_FILES = [
+    { name: 'IMG_4472.jpg' },
+    { name: 'IMG_4471.jpg' },
+    { name: 'IMG_4480.PNG' },
+    { name: 'DSC_0009 lens detail with a very long descriptive name.jpeg' },
+    { name: 'IMG_4473.jpg' },
+    { name: 'shutter-closeup.png' }
+  ];
+
+  var OPTIONS = [
+    { id: 'A', name: 'Ledger', size: [660, 480],
+      why: 'Charcoal control strip on top, a cream archival ledger below with frame number, old name, new name and status, brass Rename in the footer. Benefit: the safety check is the whole screen and reads like a catalogue card. Cost: the widest window of the three.',
+      recommended: true },
+    { id: 'B', name: 'Darkroom steps', size: [780, 450],
+      why: 'A dark left column with three dial-numbered steps (Photos, Code, Rename) and the cream ledger on the right. Benefit: the order of actions is obvious the first time and the big Rename button is hard to miss. Cost: the left column is dead space once the habit forms.',
+      recommended: false },
+    { id: 'C', name: 'Film strip', size: [440, 560],
+      why: 'A narrow dark window that fits beside Finder: code on top, then each photo as a numbered frame on a film strip with the new name in bold and the old name beneath. Benefit: smallest footprint and the most atmosphere. Cost: conflict wording relies on colour plus a short badge.',
+      recommended: false }
+  ];
+
+  function finderCompare(a, b) {
+    return a.name.localeCompare(b.name, undefined, { numeric: true, sensitivity: 'base' });
+  }
+  function pad3(n) { var s = String(n); while (s.length < 3) s = '0' + s; return s; }
+  function splitExt(name) {
+    var i = name.lastIndexOf('.');
+    if (i <= 0) return { base: name, ext: '' };
+    return { base: name.slice(0, i), ext: name.slice(i) };
+  }
+  function validateCode(code) {
+    var c = code.trim();
+    if (!c) return 'Type the camera’s inventory code.';
+    if (/[\/:]/.test(c)) return 'A code cannot contain / or :';
+    return '';
+  }
+
+  // Shared model for all three windows.
+  function makeState() {
+    return { files: [], code: '', phase: 'empty', occupied: false, undoBlocked: false, message: null, lastBatch: null, renamed: [] };
+  }
+  function computeRows(state) {
+    if (state.phase === 'done') {
+      return state.renamed.map(function (r) {
+        return { oldName: r.oldName, newName: r.newName, status: r.oldName === r.newName ? 'same' : 'renamed' };
+      });
+    }
+    var sorted = state.files.slice().sort(finderCompare);
+    var err = validateCode(state.code);
+    return sorted.map(function (f, i) {
+      var ext = splitExt(f.name).ext;
+      var target = err ? '' : state.code.trim() + '-' + pad3(i + 1) + ext;
+      var status = 'ready';
+      if (!err && target === f.name) status = 'same';
+      else if (!err && state.occupied && i === 0) status = 'conflict';
+      return { oldName: f.name, newName: target, status: status };
+    });
+  }
+  function summary(state, rows) {
+    var err = validateCode(state.code);
+    if (state.phase === 'empty') return { kind: 'quiet', text: 'No photos chosen yet. Cmd+O or Choose Photos….' };
+    if (state.phase === 'done') {
+      if (state.message) return state.message;
+      return { kind: 'ok', text: 'Renamed ' + state.lastBatch + ' photos in ' + FOLDER + ' (simulated). Undo Last Batch puts the old names back.' };
+    }
+    if (state.phase === 'undone') return { kind: 'ok', text: 'Restored ' + state.lastBatch + ' photos to their old names (simulated).' };
+    if (err) return { kind: 'quiet', text: rows.length + ' photos chosen. ' + err };
+    var conflicts = rows.filter(function (r) { return r.status === 'conflict'; });
+    if (conflicts.length) {
+      return { kind: 'bad', text: 'Already in this folder: ' + conflicts.map(function (r) { return r.newName; }).join(', ') + '. Nothing was changed. Use a different code or move that file first.' };
+    }
+    var n = rows.filter(function (r) { return r.status === 'ready'; }).length;
+    var same = rows.length - n;
+    return { kind: 'quiet', text: n + ' photos will be renamed in ' + FOLDER + (same ? ' (' + same + ' already named, skipped)' : '') + '.' };
+  }
+  function canRename(state, rows) {
+    if (state.phase !== 'preview' && state.phase !== 'undone') return false;
+    if (validateCode(state.code)) return false;
+    if (rows.some(function (r) { return r.status === 'conflict'; })) return false;
+    return rows.some(function (r) { return r.status === 'ready'; });
+  }
+  function canUndo(state) { return state.phase === 'done'; }
+
+  // Actions
+  function actChoose(state) { state.files = SAMPLE_FILES.slice(); state.phase = 'preview'; state.message = null; }
+  function actCode(state, v) { state.code = v; if (state.phase === 'done' || state.phase === 'undone') state.phase = 'preview'; state.message = null; }
+  function actRename(state) {
+    var rows = computeRows(state);
+    if (!canRename(state, rows)) return;
+    state.lastBatch = rows.filter(function (r) { return r.status === 'ready'; }).length;
+    state.renamed = rows.map(function (r) { return { oldName: r.oldName, newName: r.status === 'ready' ? r.newName : r.oldName }; });
+    state.files = state.renamed.map(function (r) { return { name: r.newName }; });
+    state.phase = 'done';
+    state.message = null;
+  }
+  function actUndo(state) {
+    if (!canUndo(state)) return;
+    if (state.undoBlocked) {
+      var first = state.renamed.filter(function (r) { return r.oldName !== r.newName; })[0];
+      state.message = { kind: 'bad', text: 'Cannot undo: ' + (first ? first.oldName : 'an old name') + ' now exists in ' + FOLDER + '. Nothing was changed. Move that file and try Undo again.' };
+      return;
+    }
+    state.files = state.renamed.map(function (r) { return { name: r.oldName }; });
+    state.phase = 'undone';
+    state.message = null;
+  }
+
+  // DOM helpers (DOM-safe: text is set with textContent)
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function button(label, cls, onClick, disabled, kbd) {
+    var b = el('button', 'btn' + (cls ? ' ' + cls : ''), label);
+    b.type = 'button';
+    b.disabled = !!disabled;
+    if (kbd) { b.appendChild(el('span', 'kbd', kbd)); b.title = 'Shortcut: ' + kbd; }
+    b.addEventListener('click', onClick);
+    return b;
+  }
+  function codeInput(state, rerender, id, placeholder) {
+    var inp = el('input', 'code');
+    inp.type = 'text';
+    inp.id = id;
+    inp.value = state.code;
+    inp.placeholder = placeholder || 'e.g. CAM-042';
+    inp.setAttribute('aria-label', 'Inventory code');
+    inp.setAttribute('aria-invalid', state.files.length && validateCode(state.code) ? 'true' : 'false');
+    inp.addEventListener('input', function () { actCode(state, inp.value); rerender(true); });
+    inp.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') { actRename(state); rerender(); }
+    });
+    return inp;
+  }
+  function messageEl(s, dark) { var m = el('div', 'message ' + s.kind + (dark ? ' dark' : ''), s.text); m.setAttribute('role', 'status'); return m; }
+  function emptyState(state, rerender, dark) {
+    var box = el('div', 'empty' + (dark ? ' dark' : ''));
+    box.appendChild(el('div', 'frame-icon'));
+    box.appendChild(el('div', 'lead', 'Choose the photos of one camera.'));
+    box.appendChild(button('Choose Photos…', 'primary big', function () { actChoose(state); rerender(); }, false, '⌘O'));
+    box.appendChild(el('div', 'hint', 'JPEG and PNG, any number. They stay in their folder; you see the new names before anything changes.'));
+    return box;
+  }
+  function tableEl(rows) {
+    var t = el('table');
+    var thead = el('thead'); var tr = el('tr');
+    tr.appendChild(el('th', '', 'No.'));
+    tr.appendChild(el('th', '', 'Old name'));
+    tr.appendChild(el('th', '', ''));
+    tr.appendChild(el('th', '', 'New name'));
+    tr.appendChild(el('th', '', 'Status'));
+    thead.appendChild(tr); t.appendChild(thead);
+    var tb = el('tbody');
+    rows.forEach(function (r, i) {
+      var row = el('tr', r.status);
+      row.appendChild(el('td', 'frame', pad3(i + 1)));
+      var o = el('td', 'old', r.oldName); o.title = r.oldName; row.appendChild(o);
+      row.appendChild(el('td', 'arrow', '→'));
+      var n = el('td', 'new', r.newName || '—'); n.title = r.newName; row.appendChild(n);
+      row.appendChild(el('td', 'status', statusText(r)));
+      tb.appendChild(row);
+    });
+    t.appendChild(tb);
+    return t;
+  }
+  function statusText(r) {
+    if (r.status === 'conflict') return 'already exists';
+    if (r.status === 'renamed') return 'renamed';
+    if (r.status === 'same') return 'unchanged, skipped';
+    if (!r.newName) return 'needs a code';
+    return 'ready';
+  }
+  function ledger(state, rerender, rows) {
+    var l = el('div', 'ledger');
+    if (state.phase === 'empty') l.appendChild(emptyState(state, rerender, false));
+    else { var sc = el('div', 'scroll'); sc.appendChild(tableEl(rows)); l.appendChild(sc); }
+    return l;
+  }
+
+  // Renderers
+  function renderA(state, root, rerender) {
+    root.className = 'body A';
+    var rows = computeRows(state);
+    var tb = el('div', 'toolbar');
+    tb.appendChild(button('Choose Photos…', '', function () { actChoose(state); rerender(); }, false, '⌘O'));
+    var lab = el('label', 'field'); lab.htmlFor = 'codeA'; lab.appendChild(el('span', 'lab', 'Inventory code'));
+    lab.appendChild(codeInput(state, rerender, 'codeA'));
+    tb.appendChild(lab);
+    tb.appendChild(el('span', 'grow'));
+    var counter = el('div', 'counter');
+    counter.appendChild(el('b', '', state.files.length ? pad3(state.files.length) : '—'));
+    counter.appendChild(el('span', '', state.files.length ? 'frames · ' + FOLDER : 'frames'));
+    tb.appendChild(counter);
+    root.appendChild(tb);
+    root.appendChild(ledger(state, rerender, rows));
+    var ft = el('div', 'footer');
+    var msg = el('div', 'msg'); msg.appendChild(messageEl(summary(state, rows))); ft.appendChild(msg);
+    ft.appendChild(button('Undo Last Batch', 'on-cream', function () { actUndo(state); rerender(); }, !canUndo(state), '⌘Z'));
+    ft.appendChild(button('Rename', 'primary', function () { actRename(state); rerender(); }, !canRename(state, rows), '↩'));
+    root.appendChild(ft);
+  }
+
+  function renderB(state, root, rerender) {
+    root.className = 'body B';
+    var rows = computeRows(state);
+    var err = state.files.length ? validateCode(state.code) : '';
+    var activeStep = state.phase === 'empty' ? 1 : (err ? 2 : 3);
+    var side = el('div', 'side');
+    function stepHead(n, text) { var h = el('h3'); h.appendChild(el('span', 'dial', String(n))); h.appendChild(el('span', '', text)); return h; }
+    var s1 = el('div', 'step' + (activeStep === 1 ? ' active' : '')); s1.appendChild(stepHead(1, 'Photos'));
+    s1.appendChild(button('Choose Photos…', activeStep === 1 ? 'primary' : '', function () { actChoose(state); rerender(); }, false, '⌘O'));
+    s1.appendChild(el('div', 'sub', state.files.length ? state.files.length + ' photos in ' + FOLDER : 'JPEG or PNG, kept in their folder'));
+    side.appendChild(s1);
+    var s2 = el('div', 'step' + (activeStep === 2 ? ' active' : '')); s2.appendChild(stepHead(2, 'Inventory code'));
+    var lab = el('label', 'field stack'); lab.htmlFor = 'codeB';
+    lab.appendChild(codeInput(state, rerender, 'codeB'));
+    lab.appendChild(el('span', 'hint' + (err ? ' bad' : ''), err || 'Names become CODE-001, CODE-002…'));
+    s2.appendChild(lab); side.appendChild(s2);
+    var s3 = el('div', 'step' + (activeStep === 3 ? ' active' : '')); s3.appendChild(stepHead(3, 'Rename'));
+    var readyN = rows.filter(function (r) { return r.status === 'ready'; }).length;
+    s3.appendChild(button('Rename ' + (readyN ? readyN + ' photos' : ''), 'primary big', function () { actRename(state); rerender(); }, !canRename(state, rows), '↩'));
+    s3.appendChild(button('Undo Last Batch', 'link', function () { actUndo(state); rerender(); }, !canUndo(state), '⌘Z'));
+    side.appendChild(s3);
+    side.appendChild(el('div', 'spacer'));
+    side.appendChild(el('div', 'brand', 'Frame Names'));
+    root.appendChild(side);
+    var main = el('div', 'main');
+    var bar = el('div', 'msgbar'); bar.appendChild(messageEl(summary(state, rows))); main.appendChild(bar);
+    main.appendChild(ledger(state, rerender, rows));
+    root.appendChild(main);
+  }
+
+  function renderC(state, root, rerender) {
+    root.className = 'body C';
+    var rows = computeRows(state);
+    var top = el('div', 'top');
+    var r1 = el('div', 'row');
+    var lab = el('label', 'field'); lab.htmlFor = 'codeC'; lab.appendChild(el('span', 'lab', 'Code')); r1.appendChild(lab);
+    r1.appendChild(codeInput(state, rerender, 'codeC', 'CAM-042'));
+    r1.appendChild(button('Choose Photos…', '', function () { actChoose(state); rerender(); }, false, '⌘O'));
+    top.appendChild(r1);
+    top.appendChild(el('div', 'hint', state.files.length ? pad3(state.files.length) + ' frames · ' + FOLDER : 'JPEG or PNG, kept in their folder'));
+    root.appendChild(top);
+    if (state.phase === 'empty') { var e = emptyState(state, rerender, true); e.style.background = '#0e0c0a'; root.appendChild(e); }
+    else {
+      var sc = el('div', 'strip'); var ul = el('ul', 'list');
+      rows.forEach(function (r, i) {
+        var li = el('li', r.status);
+        li.appendChild(el('span', 'fr', pad3(i + 1)));
+        var names = el('div', 'names');
+        var n = el('div', 'n', r.newName || 'Type a code'); n.title = r.newName; names.appendChild(n);
+        var o = el('div', 'o', 'was ' + r.oldName); o.title = r.oldName; names.appendChild(o);
+        li.appendChild(names);
+        li.appendChild(el('span', 'badge', statusText(r)));
+        ul.appendChild(li);
+      });
+      sc.appendChild(ul); root.appendChild(sc);
+    }
+    var bottom = el('div', 'bottom');
+    bottom.appendChild(messageEl(summary(state, rows), true));
+    var row = el('div', 'row');
+    row.appendChild(button('Undo Last Batch', 'link', function () { actUndo(state); rerender(); }, !canUndo(state), '⌘Z'));
+    row.appendChild(el('span', 'grow'));
+    row.appendChild(button('Rename', 'primary', function () { actRename(state); rerender(); }, !canRename(state, rows), '↩'));
+    bottom.appendChild(row);
+    root.appendChild(bottom);
+  }
+
+  var renderers = { A: renderA, B: renderB, C: renderC };
+
+  function buildOption(opt) {
+    var state = makeState();
+    var wrap = el('section', 'option');
+    wrap.setAttribute('aria-label', 'Option ' + opt.id + ': ' + opt.name);
+    var h = el('h2', '', 'Option ' + opt.id + ' — ' + opt.name + ' ');
+    h.appendChild(el('span', '', opt.size[0] + '×' + opt.size[1] + (opt.recommended ? ' · recommended' : '')));
+    wrap.appendChild(h);
+    wrap.appendChild(el('p', 'why', opt.why));
+
+    var controls = el('div', 'demo-controls');
+    controls.appendChild(el('span', '', 'Demo state:'));
+    var win = el('div', 'window');
+    win.style.width = opt.size[0] + 'px'; win.style.height = opt.size[1] + 'px';
+    var tbar = el('div', 'titlebar'); var lights = el('div', 'lights');
+    lights.appendChild(el('i')); lights.appendChild(el('i')); lights.appendChild(el('i'));
+    tbar.appendChild(lights); tbar.appendChild(el('div', 'title', 'Frame Names')); win.appendChild(tbar);
+    var body = el('div', 'body'); win.appendChild(body);
+
+    function rerender(keepFocus) {
+      var focusedId = keepFocus && document.activeElement ? document.activeElement.id : null;
+      var caret = keepFocus && document.activeElement && document.activeElement.selectionStart;
+      while (body.firstChild) body.removeChild(body.firstChild);
+      renderers[opt.id](state, body, rerender);
+      if (focusedId) { var f = document.getElementById(focusedId); if (f) { f.focus(); try { f.setSelectionRange(caret, caret); } catch (e) {} } }
+    }
+    controls.appendChild(button('Sample photos', '', function () { state = makeState(); actChoose(state); state.code = 'CAM-042'; rerender(); }));
+    controls.appendChild(button('Empty (nothing chosen)', '', function () { state = makeState(); rerender(); }));
+    controls.appendChild(button('Target occupied', '', function () { state = makeState(); actChoose(state); state.code = 'CAM-042'; state.occupied = true; rerender(); }));
+    controls.appendChild(button('Renamed, undo blocked', '', function () { state = makeState(); actChoose(state); state.code = 'CAM-042'; actRename(state); state.undoBlocked = true; rerender(); }));
+    controls.appendChild(button('Reset', '', function () { state = makeState(); rerender(); }));
+    wrap.appendChild(controls);
+    wrap.appendChild(win);
+
+    var chooseRow = el('div', 'demo-controls');
+    var ta = el('textarea', 'choose-summary'); ta.readOnly = true; ta.setAttribute('aria-label', 'Choice summary for option ' + opt.id); ta.hidden = true;
+    chooseRow.appendChild(button('Choose Option ' + opt.id, 'primary', function () {
+      ta.hidden = false;
+      ta.value = 'I choose Option ' + opt.id + ' (' + opt.name + ', revision 2, ' + opt.size[0] + '×' + opt.size[1] + ') for Frame Names. Changes I want: (none)';
+      ta.focus(); ta.select();
+    }));
+    chooseRow.appendChild(el('span', 'note', 'Creates a summary you can copy into the chat. Nothing is sent anywhere.'));
+    wrap.appendChild(chooseRow);
+    wrap.appendChild(ta);
+
+    // Default demo state: sample photos with a code typed, so the preview is visible at once.
+    actChoose(state); state.code = 'CAM-042';
+    rerender();
+    return wrap;
+  }
+
+  var container = document.getElementById('options');
+  OPTIONS.forEach(function (o) { container.appendChild(buildOption(o)); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.pyc
+.build/
+evaluation/runs/
+evaluation/screenshots/
+dist/
+AGENTS.md
+CLAUDE.md
+.Codex/
+.codex/
+.claude/
+MEMORY.md
+.env
+.env.*
+evaluation/rc-prompts/*
+!evaluation/rc-prompts/FACTS.md

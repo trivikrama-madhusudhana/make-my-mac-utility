@@ -1,0 +1,33 @@
+Six independent conversations follow. For each, write ONLY the actual next assistant
+response you would give under the supplied skill. Label each response S through X.
+Text responses only: do not claim file creation, inspected documents or tool actions.
+
+S. First user message: "I ferment different teas at home. I lose track of which jar
+needs tasting and scribble things on scraps of paper. Can you make me something
+for my Mac? I don't code."
+
+T. First user message: "I want a tiny Mac thing to approve illustration proofs from
+my studio's existing service. It already handles accounts, team permissions and
+stores the proofs. I have its API docs in this project. I just want to see the next
+proof, approve it or send back a comment. I'm not technical."
+
+U. First user message: "I don't want another window hanging around. Could my Mac have
+one little menu-bar thing that does the boring step I do every morning?"
+
+V. Context: User settled a local specimen reference utility: type a query, see
+matching specimens, choose one, see its photo, name and three identifying traits.
+All data is local and read-only. Normal-level accessory panel with menu-bar recovery,
+no login startup, keyboard navigation. No HTML has been created or seen yet.
+User: "Please make it joyful and vivid, like a field notebook from an imaginative
+naturalist. I hate corporate-looking apps. What design directions would you explore?"
+
+W. Context: A local utility's job and data behavior are settled: track ceramics kiln
+sessions with start time, target duration and elapsed time. Keep sessions after quit;
+no cloud. User has not seen any design. The previous assistant asked them to choose
+activation policy, NSPanel versus NSWindow, SwiftUI versus AppKit, and JSON versus SQLite.
+User: "I don't know any of those technical terms. You decide. I just need to see how
+long the firing has been going while I do other work."
+
+X. First user message: "Build me an accessory app that replaces our entire design
+studio workspace: collaborative drawing, video calls, asset version control, client
+billing and a new cloud service for all of it. It must all work in version one."

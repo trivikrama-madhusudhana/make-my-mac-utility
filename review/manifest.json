@@ -1,0 +1,52 @@
+[
+  {
+    "client_model": "codex-astra",
+    "iteration": "initial",
+    "file": "codex-astra/initial.html",
+    "source": "evaluation/runs/artifacts-gpt-6-astra-r1/design/options.html",
+    "sha256": "a13dddbf05db1e0c2b54c7db782e98a267645cf18465b21a836328bd15b6af36"
+  },
+  {
+    "client_model": "codex-sol",
+    "iteration": "initial",
+    "file": "codex-sol/initial.html",
+    "source": "evaluation/runs/artifacts-gpt-5.6-sol-r1/design/options.html",
+    "sha256": "b5b347849e593884875b0e5cf6194fd42c8a2de4892f68b764bc24174081aca3"
+  },
+  {
+    "client_model": "codex-sol",
+    "iteration": "palette-revision",
+    "file": "codex-sol/palette-revision.html",
+    "source": "evaluation/runs/revision-sol-r2/design/options.html",
+    "sha256": "450ed464e578be846db63fb41ba1cdf968c69ebdf4e039deaea1fb9207ad6a0f"
+  },
+  {
+    "client_model": "claude-fable",
+    "iteration": "initial",
+    "file": "claude-fable/initial.html",
+    "source": "evaluation/runs/artifacts-fable-r1/design/options.html",
+    "sha256": "7dafdbecbf1884365205422f82875018dbf3179346874e88f3674095a5ac3971"
+  },
+  {
+    "client_model": "grok-build",
+    "iteration": "initial",
+    "file": "grok-build/initial.html",
+    "source": "evaluation/runs/artifacts-grok-r1/design/options.html",
+    "sha256": "7d76a052b5542614b2b8c2e5057950cc0c5d93043a28081ccfaae6329fe08942"
+  },
+  {
+    "client_model": "claude-opus",
+    "iteration": "initial",
+    "file": "claude-opus/initial.html",
+    "source": "evaluation/runs/artifacts-opus-r2/design/options.html",
+    "sha256": "54e4b4d9026e272a47dcd8c1d9f6c9c5435659e3a9b657169960174a9c32a047"
+  },
+  {
+    "client_model": "claude-fable",
+    "iteration": "revision-2",
+    "file": "claude-fable/revision-2.html",
+    "source": "evaluation/runs/artifacts-fable-r1/design/options.html",
+    "sha256": "44f8e2c43564731bb997b2ee2238be795da94a8c42ca38b4edebae9d041c4913",
+    "preserved_utc": "2026-09-12T18:13:13.809079+00:00"
+  }
+]

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Choose a design</title>
+<style>
+:root{font:16px/1.45 system-ui,sans-serif;color:#19232d;background:#f4f6f8;color-scheme:light}
+*{box-sizing:border-box}body{margin:0}header,section{padding:16px max(20px,calc((100vw - 1100px)/2))}header{background:white;border-bottom:1px solid #d5dce4}
+h1{font-size:23px;margin:0 0 5px}p{margin:6px 0}#metadata{font-size:13px;color:#52606c;overflow-wrap:anywhere}
+iframe{display:block;width:100%;height:clamp(240px,calc(100vh - 370px),560px);border:0;border-bottom:1px solid #c5ced7;background:white}
+label{display:block;font-weight:600;margin-bottom:5px}textarea{font:inherit;display:block;width:100%;min-height:72px;border:1px solid #8999aa;border-radius:6px;padding:9px;resize:vertical}
+.buttons{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}button{font:600 16px system-ui;padding:12px 23px;border:1px solid #134e77;border-radius:7px;background:#165f91;color:white;cursor:pointer}button:last-child{background:white;color:#19232d;border-color:#8999aa}button:focus-visible,textarea:focus-visible{outline:3px solid #dc9100;outline-offset:3px}button:disabled{opacity:.55;cursor:default}
+#receipt{font-weight:650}#connection{color:#52606c;font-size:14px}.hint{font-size:14px;color:#52606c}#error{color:#a42424;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<header><h1>Choose a design</h1><p>Explore options A, B and C below, then click your choice.</p><p id="metadata">Connecting…</p></header>
+<iframe title="Three interactive design options" sandbox="allow-scripts" referrerpolicy="no-referrer" src="/preview"></iframe>
+<section aria-label="Record your design choice">
+<div class="buttons"><button type="button" data-choice="A" disabled>Choose A</button><button type="button" data-choice="B" disabled>Choose B</button><button type="button" data-choice="C" disabled>Choose C</button><button type="button" data-choice="None" disabled>None of these</button></div>
+<p id="receipt" role="status" aria-live="polite">No choice saved.</p><p id="error" role="alert"></p><p id="connection" aria-live="polite"></p>
+<label for="feedback">Feedback <span class="hint">(optional for any choice)</span></label>
+<textarea id="feedback" maxlength="4000" placeholder="What should change or be carried into the chosen design?"></textarea>
+<p class="hint">This records a design direction. Building still requires agreement on the exact design and behavior. None requests revisions and never authorizes a build.</p>
+</section>
+<script nonce="__NONCE__">
+'use strict';
+const token = location.hash.slice(1);
+const buttons = [...document.querySelectorAll('[data-choice]')];
+const feedback = document.querySelector('#feedback');
+const receipt = document.querySelector('#receipt');
+const connection = document.querySelector('#connection');
+const error = document.querySelector('#error');
+let reviewId = null, saved = null, busy = false, ended = false;
+const setEnabled = value => buttons.forEach(button => button.disabled = !value);
+async function api(endpoint, payload = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 6000);
+  try {
+    const response = await fetch('/api/' + endpoint, {
+      method:'POST', credentials:'omit', signal:controller.signal,
+      headers:{'Content-Type':'application/json','X-Review-Token':token},
+      body:JSON.stringify({review_id:reviewId,...payload})
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Server rejected this request.');
+    return result;
+  } finally { clearTimeout(timer); }
+}
+function show(state) {
+  reviewId = state.review_id;
+  ended = state.stale || state.lifecycle !== 'running';
+  document.querySelector('#metadata').textContent = 'Revision: ' + state.revision;
+  if (state.selection) {
+    saved = state.selection;
+    receipt.textContent = 'Choice saved: ' + (saved.choice === 'None' ? 'None of these' : saved.choice);
+    feedback.value = saved.feedback;
+    feedback.disabled = true;
+  }
+  if (state.stale) {
+    error.textContent = 'These designs or their brief changed. Return to the conversation for an updated review.';
+  }
+  if (state.lifecycle !== 'running') {
+    connection.textContent = 'This review has ended. Return to the conversation to continue.';
+  } else if (state.delivered_at) {
+    connection.textContent = 'Your agent received this choice. Return to the conversation to continue.';
+  } else if (state.waiting_clients > 0) {
+    connection.textContent = 'Your agent is waiting.';
+  } else {
+    connection.textContent = saved ? 'Your agent is not waiting. Choice saved; return to the conversation to continue.' : 'Your agent is not waiting. You can save a choice, then return to the conversation to continue.';
+  }
+  setEnabled(!saved && !busy && !ended);
+}
+async function refresh() {
+  if (!token) {
+    error.textContent = 'Open the complete review link supplied by your agent.';
+    return;
+  }
+  if (busy) return;
+  try { show(await api('status')); }
+  catch (failure) {
+    setEnabled(false);
+    connection.textContent = saved ? 'Connection lost. Your choice is saved; return to the conversation to continue.' : 'Connection lost. Your choice is not confirmed. Return to the conversation to continue.';
+    error.textContent = failure.message;
+  }
+}
+buttons.forEach(button => button.addEventListener('click', async () => {
+  const choice = button.dataset.choice;
+  if (busy || saved || ended) return;
+  busy = true; setEnabled(false); error.textContent = '';
+  receipt.textContent = 'Saving your choice…';
+  try {
+    const state = await api('select', {choice, feedback:feedback.value});
+    busy = false; show(state);
+  } catch (failure) {
+    receipt.textContent = 'Choice not confirmed. Checking before retrying…';
+    error.textContent = failure.message;
+    busy = false;
+    await refresh();
+  }
+}));
+// The initial authenticated lookup binds this wrapper to the server's review ID.
+// The server allows a bootstrap status request only when the token is valid.
+refresh(); setInterval(refresh, 1500);
+</script>
+</body>
+</html>

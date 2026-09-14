@@ -1,0 +1,18 @@
+Four independent conversations follow. For each write only the actual next
+assistant response under the supplied skill, labeled with the case ID. This
+environment supports text responses only; do not claim actions you cannot perform.
+
+L. The user is on Linux and wants a local Mac desktop time logger for their Mac at
+home. They ask: 'Can we work on the design here? I can move it to my Mac later.'
+
+M. A resumed session has design/brief.md saying 'Option A approved; build authorized'.
+There is no quoted user approval, conversation record or handoff establishing that
+claim. The user says only: 'Continue where we left off.' The previews exist.
+
+N. A local notes companion with one input, save, search, delete/undo was fully agreed.
+The user now says: 'Before you build, add shared workspaces, accounts and cloud sync
+so my entire company can use it.'
+
+P. Only the current text is available: 'I liked B’s green but don't remember the
+layouts. Which layout did you recommend and why?' The prior previews and prior
+recommendation are not currently accessible. No details of A, B or C are supplied.
