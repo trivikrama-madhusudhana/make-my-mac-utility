@@ -26,7 +26,7 @@ Native testing used one Apple silicon Mac. A second Mac, Intel hardware, older m
 | [Pocket Notes sprint](POCKET-NOTES-RESULTS.md) | Earlier notes-app runs and the failures that informed later instructions. |
 | [Initial plan](PLAN.md), [four-model plan](RELEASE-CANDIDATE-PLAN.md), [follow-up plan](PUBLISH-VALIDATION-PLAN.md) | The intended checks and scope, separate from the reported outcomes. |
 
-The scenario fixtures, rubrics, and runner scripts support future regression work. Historical preview-check and gallery-builder scripts are retained for reproducing local experiments; they require their matching run artifacts and are not general-purpose graders. The generated galleries and raw run data are excluded from the repository. The standalone [Pocket Notes example](../examples/pocket-notes/README.md) is unchanged.
+The scenario fixtures, rubrics, and runner scripts support future regression work. Historical preview-check and gallery-builder scripts are retained for reproducing local experiments; they require their matching run artifacts and are not general-purpose graders. The generated galleries and raw run data are excluded from the repository. The featured [Steep example](../examples/steep/README.md) preserves the final Opus tea-timer preview; the additional [Pocket Notes example](../examples/pocket-notes/README.md) is unchanged.
 
 ## Run the helper checks
 

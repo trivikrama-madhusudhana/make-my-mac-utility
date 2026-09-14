@@ -2,7 +2,7 @@
 
 This skill helps you turn an app idea or a repeated workflow into a native Mac utility through a consultative process. It works with Claude Code and Codex. Other coding agents may be able to follow the instructions, but the supported release has been evaluated with these two clients.
 
-You might want a small panel to capture notes while you work, a knitting counter that remembers your place, or a menu-bar shortcut for a task you repeat throughout the day. Start with what you want to do. The agent helps you decide how the app should work, explores designs with you, then builds and tests it on your Mac.
+You might want a small panel to capture notes while you work, a tea timer that stays visible while you work, or a menu-bar shortcut for a task you repeat throughout the day. Start with what you want to do. The agent helps you decide how the app should work, explores designs with you, then builds and tests it on your Mac.
 
 You don't need to arrive with a specification or know how to build a Mac app. The skill gives the agent a consultation process and native Mac guidance, so it can recommend choices and explain what they mean for your experience.
 
@@ -16,7 +16,7 @@ Three designs are the starting point. Ask for more alternatives, request changes
 
 When you're ready, the agent recaps the agreed app and builds it with your approval. It checks the packaged app against that agreement, repairs issues it finds, and tells you what it could and couldn't verify. You receive a local app you can launch, editable source code, and instructions for building, using, and maintaining it.
 
-The [Pocket Notes example](examples/pocket-notes/README.md) contains three interactive designs for a notes utility. Download or clone the repository and open its `options.html` locally to try them.
+The featured example is [Steep, a tea timer](examples/steep/README.md): set your steeping time, watch the countdown, and leave the Ready message visible until you dismiss it. It includes three interactive designs from an actual consultation. Download or clone the repository and open `examples/steep/options.html` locally to try them.
 
 ## Running it
 
@@ -45,7 +45,7 @@ Start with the [evaluation summary](evaluation/README.md) for the results, remai
 
 The skill includes Python helpers for collecting design choices and packaging a local Swift app. The packager applies local ad-hoc signing; public signing and notarization are separate distribution work.
 
-Testing includes more than the HTML previews. During evaluation, a knitting counter passed its initial logic checks but failed native shortcuts and could discard a pending increment after a save failure. The agent repaired those issues, and the skill gained more specific verification instructions. The [validation report](evaluation/PUBLISH-VALIDATION-RESULTS.md) records original output, repairs, retests, and remaining limits.
+Testing includes more than the HTML previews. During evaluation, Steep lost keyboard focus after clicking Dismiss, even though dismissing with the keyboard worked. The agent repaired that behavior, and the final app was checked by clicking Dismiss, Cancel, and Retry, then immediately typing. The [four-model evaluation](evaluation/RELEASE-CANDIDATE-RESULTS.md) records the repairs, retests, and remaining limits.
 
 Run the complete helper suite on a Mac with Swift and `codesign`:
 
@@ -59,7 +59,7 @@ For the review bridge alone, without building a native app:
 python3 -m unittest discover -s evaluation -p 'test_design_review.py' -v
 ```
 
-The current suite has 14 bridge tests and four packager tests. [Earlier evaluations](evaluation/RELEASE-CANDIDATE-RESULTS.md) cover Astra and Sol in Codex, and Opus and Fable in Claude Code. The September 14 follow-up adds a knitting-counter build and browser-to-agent delivery in Codex. It does not establish a fresh four-model pass after every final edit, or verify Claude Code's background notification route.
+The current suite has 14 bridge tests and four packager tests. [Earlier evaluations](evaluation/RELEASE-CANDIDATE-RESULTS.md) cover Astra and Sol in Codex, and Opus and Fable in Claude Code. The [September 14 follow-up](evaluation/PUBLISH-VALIDATION-RESULTS.md) adds another native-app build and browser-to-agent delivery in Codex. It does not establish a fresh four-model pass after every final edit, or verify Claude Code's background notification route.
 
 All native evaluation used one Apple silicon Mac. Intel hardware, another Mac, older macOS runtimes, VoiceOver, and the full Spaces and sleep/wake behavior remain unverified. Grok output is retained as historical evidence and is outside the supported release scope.
 
@@ -69,7 +69,8 @@ All native evaluation used one Apple silicon Mac. Intel hardware, another Mac, o
 | --- | --- |
 | `skills/make-my-mac-utility/` | Installable skill, references, review page, and helper scripts |
 | `evaluation/` | Plans, scenario fixtures, tests, and reports |
-| `examples/pocket-notes/` | A fictional notes-app consultation example |
+| `examples/steep/` | Featured tea-timer example with three interactive designs |
+| `examples/pocket-notes/` | An additional notes-app consultation example |
 | `package-metadata.json` | Source distribution metadata, not a package-manager installer |
 | `design/brief.md` in a generated project | Behavior, data contract, selected design, agreement, and acceptance checks |
 | `design/options.html` in a generated project | Interactive design options |
